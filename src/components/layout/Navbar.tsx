@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { href: "/capsule", label: "知识胶囊", icon: "💊" },
   { href: "/dashboard", label: "导师驾驶舱", icon: "📊" },
   { href: "/growth", label: "思维成长", icon: "🧠" },
+  { href: "/discover", label: "论文发现", icon: "🔍" },
   { href: "/onboarding", label: "新生入组", icon: "🚀" },
 ];
 

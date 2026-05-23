@@ -1,6 +1,8 @@
 // 研脉 · 四维AI审阅引擎配置
 // 每个引擎有独立的系统提示词、知识范围和输出风格
 
+import papers from "@/data/papers.json";
+
 export type EngineType = "mentor" | "senior" | "reviewer" | "cross";
 
 export interface EngineConfig {
@@ -178,39 +180,231 @@ const PRESET_REVIEWS: Record<number, LensReviewResult[]> = {
   ],
 };
 
-// 为其他论文生成默认审阅
-function generateDefaultReview(paperId: number): LensReviewResult[] {
-  const engines = ["mentor", "senior", "reviewer", "cross"] as const;
-  const labels: Record<string, string> = {
-    mentor: "🎓 导师引擎",
-    senior: "🧑‍🔬 师兄引擎",
-    reviewer: "📝 审稿人引擎",
-    cross: "🔗 跨学科引擎",
-  };
-  const summaries: Record<string, string> = {
-    mentor:
-      "这篇工作的研究方向具有重要的学术价值。在阅读时，请关注其研究范式和方法论框架，思考如何与课题组现有方向结合。",
-    senior:
-      "这篇论文涉及的方法我部分实践过，有些操作细节值得注意。建议结合课题组积累的实验经验来理解。",
-    reviewer:
-      "从方法论角度看，这篇工作的实验设计有可取之处，但也存在一些需要注意的局限性。",
-    cross: "这篇工作的方法和思路与其他领域有一些有趣的关联，值得从跨学科角度思考潜在的新方向。",
-  };
+// 跨学科映射表
+const CROSS_DISCIPLINE_MAP: Record<string, string[]> = {
+  "缺陷工程": ["半导体离子注入+退火工艺", "合金强化中的位错调控", "蛋白质定点突变改造"],
+  "光催化": ["自然光合作用光系统II", "光伏电池电荷分离", "光热治疗纳米平台"],
+  "异质结": ["半导体异质结器件", "生物膜离子通道", "热电材料界面工程"],
+  "单原子催化": ["均相催化金属中心", "酶活性位点催化", "金属蛋白电子传递"],
+  "电催化": ["电解水产氢工业装置", "燃料电池MEA设计", "生物电化学传感"],
+  "CO₂还原": ["自然界卡尔文循环", "工业费托合成", "海洋碳固定机制"],
+  "机器学习": ["材料基因组计划", "药物虚拟筛选", "计算机视觉特征提取"],
+  "MoS₂": ["石墨烯电子器件", "拓扑绝缘体表面态", "层状黏土矿物插层"],
+  "钙钛矿": ["传统铁电陶瓷", "高温超导铜氧化物", "有机-无机杂化发光材料"],
+  "CVD": ["半导体外延生长", "薄膜涂层工业", "气溶胶颗粒合成"],
+};
 
-  return engines.map((engine) => ({
-    engine,
-    label: labels[engine],
-    icon: ENGINE_CONFIGS[engine].icon,
-    summary: summaries[engine],
-    annotations: [
-      {
-        anchor_text: "（论文摘要关键词）",
-        content: `[${ENGINE_CONFIGS[engine].label}] 对论文#${paperId}的审阅：此论文可纳入课题组知识库进行深入研读。具体批注将在学生阅读过程中动态浮现。`,
-        confidence: "medium" as const,
-        confidence_note: "通用审阅，待深度分析",
-      },
-    ],
-  }));
+const GAP_PATTERNS = [
+  /仍不明确/,
+  /仍存在争议/,
+  /remains unclear/,
+  /remains a challenge/,
+  /尚未(被)?系统/,
+  /缺乏系统/,
+  /关键挑战/,
+  /开放问题/,
+  /open question/,
+  /further investigation/,
+  /待进一步/,
+  /需要更多/,
+  /future work/,
+  /\?/,
+];
+
+const METHOD_KEYWORDS = [
+  "CVD", "水热", "溶剂热", "退火", "煅烧", "旋涂", "滴涂", "溅射",
+  "XPS", "XRD", "TEM", "SEM", "AFM", "Raman", "XAFS", "FTIR", "BET",
+  "EDS", "XANES", "EXAFS", "EPR", "UPS", "UV-vis", "PL",
+  "表征", "测试", "测量", "检测",
+];
+
+const COMPARISON_PATTERNS = [
+  /优于/, /高于/, /提升/, /增强/, /改善/, /outperform/,
+  /enhanced/, /improved/, /superior/, /倍$/, /显著/,
+  /与.*不一致/, /挑战了/,
+];
+
+function findSentencesWith(text: string, patterns: RegExp[]): { sentence: string; index: number }[] {
+  const results: { sentence: string; index: number }[] = [];
+  for (const pat of patterns) {
+    let match: RegExpExecArray | null;
+    const regex = new RegExp(pat.source, pat.flags);
+    while ((match = regex.exec(text)) !== null) {
+      const start = match.index;
+      const end = Math.min(start + 200, text.length);
+      const context = text.slice(Math.max(0, start - 60), end).trim();
+      if (!results.find((r) => r.index === start)) {
+        results.push({ sentence: context, index: start });
+      }
+    }
+  }
+  return results.sort((a, b) => a.index - b.index);
+}
+
+function findKeywords(text: string, keywords: string[]): { word: string; context: string }[] {
+  const results: { word: string; context: string }[] = [];
+  for (const kw of keywords) {
+    const idx = text.toLowerCase().indexOf(kw.toLowerCase());
+    if (idx !== -1) {
+      const start = Math.max(0, idx - 40);
+      const end = Math.min(text.length, idx + kw.length + 80);
+      results.push({ word: kw, context: text.slice(start, end).trim() });
+    }
+  }
+  return results.slice(0, 5);
+}
+
+interface PaperLike {
+  title: string;
+  abstract: string;
+  sections: string[][];
+  tags: string[];
+}
+
+function generatePaperAwareReview(paper: PaperLike): LensReviewResult[] {
+  const fullText = [paper.abstract, ...paper.sections.map((s) => s[1])].join(" ");
+  const introText = paper.sections.find((s) => s[0].match(/introduction|引言/i))?.[1] || "";
+  const methodText = paper.sections.find((s) => s[0].match(/experimental|methods?|实验|方法/i))?.[1] || "";
+  const resultText = paper.sections.find((s) => s[0].match(/results?|结果/i))?.[1] || "";
+  const title = paper.title;
+
+  const gapSentences = findSentencesWith(introText + fullText.slice(0, 500), GAP_PATTERNS);
+  const methodMentions = findKeywords(methodText + fullText, METHOD_KEYWORDS);
+  const comparisonSentences = findSentencesWith(resultText + introText, COMPARISON_PATTERNS);
+
+  const relevantTags = paper.tags.filter((t) => CROSS_DISCIPLINE_MAP[t]);
+  const crossAnalogies = relevantTags.flatMap((t) =>
+    (CROSS_DISCIPLINE_MAP[t] || []).map((a) => ({ tag: t, analogy: a }))
+  );
+
+  const results: LensReviewResult[] = [];
+
+  // Mentor
+  const mentorAnnotations: LensAnnotation[] = [];
+  if (gapSentences.length > 0) {
+    for (const g of gapSentences.slice(0, 2)) {
+      mentorAnnotations.push({
+        anchor_text: g.sentence.slice(0, 120),
+        content: `你考虑过这个问题吗？论文明确指出了"${g.sentence.slice(0, 60)}..."——这正是你实验设计中需要重点关注的方向。尝试设计一个对照组来验证这个变量，而不是接受现有结论。`,
+        confidence: "medium",
+        confidence_note: "基于论文原文gap识别",
+      });
+    }
+  } else {
+    mentorAnnotations.push({
+      anchor_text: paper.title,
+      content: `这篇关于${paper.tags.slice(0, 3).join('、')}的工作值得深入研读。阅读时重点关注：研究范式是否可以迁移到你的方向？方法论框架有哪些可借鉴之处？思考如何与课题组现有积累结合。`,
+      confidence: "medium",
+      confidence_note: "通用引导",
+    });
+  }
+  results.push({
+    engine: "mentor",
+    label: "🎓 导师引擎",
+    icon: "🎓",
+    summary: introText
+      ? `这篇关于${title.slice(0, 60)}的工作聚焦${paper.tags.slice(0, 3).join('、')}方向。建议带着问题阅读：它的核心发现是否挑战了已有认知？方法论是否可以迁移？`
+      : "这篇工作具有学术价值，建议关注其研究范式和方法论框架。",
+    annotations: mentorAnnotations,
+  });
+
+  // Senior
+  const seniorAnnotations: LensAnnotation[] = [];
+  if (methodMentions.length > 0) {
+    for (const m of methodMentions.slice(0, 2)) {
+      const tips: Record<string, string> = {
+        "CVD": `如果复现此实验，注意CVD气氛控制——微量氧泄漏会彻底改变产物。建议在手套箱连用的管式炉中操作，避免空气暴露。`,
+        "XPS": "做XPS前务必确认荷电校正基准。C 1s 284.8 eV不是万能的——如果样品本身含碳，用Au 4f或Ar离子枪清洁后再测。",
+        "退火": "退火操作最关键的是升降温速率和气氛控制。我们之前因为降温太快导致亚稳相出现，数据完全不可比。建议用Ramp模式，≤5°C/min降温。",
+        "XRD": "XRD测层状材料时注意取向效应——如果样品没有充分研磨和随机取向，峰强度比会严重失真。",
+        "TEM": "TEM制样时超声分散时间别太长（>15min），会把纳米片打碎。直接在铜网上滴一滴分散液，自然干燥就行。",
+        "Raman": "Raman测MoS₂时激光功率别超过1mW——功率高了会原位氧化，E¹₂g峰位漂移。先用低功率试，看峰位稳定再加。",
+      };
+      const tip = tips[m.word] || `在${m.word}表征/操作中，注意样品制备的一致性和环境控制。我们组在此环节踩过坑——同一批样品不同人测的结果偏差可达20%。`;
+      seniorAnnotations.push({
+        anchor_text: m.context.slice(0, 120),
+        content: tip,
+        confidence: "high",
+        confidence_note: "基于课题组实验经验",
+      });
+    }
+  } else {
+    seniorAnnotations.push({
+      anchor_text: paper.abstract.slice(0, 100),
+      content: "这篇涉及的方法论需要关注实验细节。建议阅读时标记所有操作参数（温度、时间、浓度、气氛），和课题组现有SOP对比——可能发现之前没注意到的关键变量。",
+      confidence: "medium",
+      confidence_note: "通用实操建议",
+    });
+  }
+  results.push({
+    engine: "senior",
+    label: "🧑‍🔬 师兄引擎",
+    icon: "🧑‍🔬",
+    summary: methodMentions.length > 0
+      ? `这篇论文涉及${methodMentions.map((m) => m.word).slice(0, 3).join('、')}等方法，我们有直接的实战经验可以分享。`
+      : "这篇论文的技术路线值得关注，建议结合实际实验经验来理解。",
+    annotations: seniorAnnotations,
+  });
+
+  // Reviewer
+  const reviewerAnnotations: LensAnnotation[] = [];
+  if (comparisonSentences.length > 0) {
+    for (const c of comparisonSentences.slice(0, 2)) {
+      reviewerAnnotations.push({
+        anchor_text: c.sentence.slice(0, 120),
+        content: `文中出现比较性声明。请关注：1) 比较基准是否合理——对比的是理想条件还是实际条件？2) 是否排除了混淆变量的影响？3) 统计显著性是否报告？如果缺少这些，结论的可靠性需要存疑。`,
+        confidence: "medium",
+        confidence_note: "方法论审查",
+      });
+    }
+  }
+  // Always add a methodology check
+  reviewerAnnotations.push({
+    anchor_text: paper.abstract.slice(0, 100),
+    content: `审阅本论文时请注意：实验是否包含必要的对照组？表征手段是否互补（至少两种独立方法验证同一结论）？结论是否超出数据直接支撑的范围？这些都是审稿人重点关注的问题。`,
+    confidence: "medium",
+    confidence_note: "通用方法论审查",
+  });
+  results.push({
+    engine: "reviewer",
+    label: "📝 审稿人引擎",
+    icon: "📝",
+    summary: comparisonSentences.length > 0
+      ? "这篇工作的结论包含比较性声明，需要在方法论层面审慎评估证据链的完整性。"
+      : "从方法论角度审视这篇工作，关注实验设计和证据链的严谨性。",
+    annotations: reviewerAnnotations.slice(0, 2),
+  });
+
+  // Cross
+  const crossAnnotations: LensAnnotation[] = [];
+  if (crossAnalogies.length > 0) {
+    for (const ca of crossAnalogies.slice(0, 2)) {
+      crossAnnotations.push({
+        anchor_text: `关键词：${ca.tag}`,
+        content: `${ca.tag}的概念在${ca.analogy}中也有类似应用。这种类比不是巧合——跨领域的方法借鉴往往是突破性创新的来源。考虑一下：${ca.analogy}领域的哪些工具或思路可以迁移过来？`,
+        confidence: "low",
+        confidence_note: "跨学科启发，待验证",
+      });
+    }
+  } else {
+    crossAnnotations.push({
+      anchor_text: paper.title,
+      content: `尝试从不同学科视角审视这篇工作——如果你的背景是物理学（关注机制）、化学（关注合成）、材料学（关注性能），会得出不同的启发。这种多视角思考本身就是一种学术训练。`,
+      confidence: "low",
+      confidence_note: "跨学科启发性思考",
+    });
+  }
+  results.push({
+    engine: "cross",
+    label: "🔗 跨学科引擎",
+    icon: "🔗",
+    summary: crossAnalogies.length > 0
+      ? `${paper.tags.slice(0, 2).join('、')}与${crossAnalogies.slice(0, 2).map((c) => c.analogy).join('、')}等领域存在深层关联，值得横向思考。`
+      : "尝试从跨学科的视角重新审视这篇工作的方法和发现。",
+    annotations: crossAnnotations,
+  });
+
+  return results;
 }
 
 // 多引擎审阅：Demo用预生成结果，生产环境并行调用4个AI引擎
@@ -227,7 +421,16 @@ export async function multiLensReview(
 
   // 其他论文生成默认审阅
   await new Promise((r) => setTimeout(r, 200));
-  return generateDefaultReview(paperId);
+  const paperData = (papers as any[]).find((p: any) => p.id === paperId);
+  if (paperData) {
+    return generatePaperAwareReview({
+      title: paperData.title,
+      abstract: paperData.abstract,
+      sections: paperData.sections,
+      tags: paperData.tags,
+    });
+  }
+  return [];
 
   // TODO: 生产环境 — 并行调用4个平台AI
   // const results = await Promise.all(

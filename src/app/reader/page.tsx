@@ -7,13 +7,16 @@ import annotations from "@/data/annotations.json";
 import type { Annotation } from "@/lib/types";
 import { multiLensReview } from "@/lib/engines";
 import type { LensReviewResult } from "@/lib/engines";
-import { trackReading, getPaperPDFUrl } from "@/lib/data-access";
+import { trackReading, getPaperPDFUrl, getAllPapers } from "@/lib/data-access";
+import type { StoredPaper } from "@/lib/storage";
+
 
 const PDFViewer = dynamicImport(() => import("@/components/reader/PDFViewer"), { ssr: false });
+const LazyPaperUpload = dynamicImport(() => import("@/components/reader/PaperUpload"), { ssr: false });
 
 type ViewMode = "structured" | "pdf";
 
-type PaperData = (typeof papers)[0] & { sections: string[][] };
+type PaperData = (typeof papers)[0] & { sections: string[][]; source?: string; id: number };
 
 // 透镜配置
 const LENS_LABELS: Record<string, string> = {
@@ -43,11 +46,26 @@ export default function ReaderPage() {
   const [viewMode, setViewMode] = useState<ViewMode>("structured");
   const [lensReview, setLensReview] = useState<LensReviewResult[] | null>(null);
   const [reviewLoading, setReviewLoading] = useState(false);
+  const [uploadedPapers, setUploadedPapers] = useState<StoredPaper[]>([]);
+  const [pdfUrl, setPdfUrl] = useState("");
   const contentRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  const paper = papers.find((p) => p.id === selectedPaperId) as PaperData | undefined;
+  // 加载已上传的论文
+  useEffect(() => {
+    getAllPapers().then(setUploadedPapers).catch(() => {});
+  }, []);
+
+  // 合并静态 + 上传论文
+  const allPapers = [...papers.map((p) => ({ ...p, source: "static" as const })), ...uploadedPapers];
+
+  const paper = allPapers.find((p) => p.id === selectedPaperId) as PaperData | undefined;
   const sections: string[][] = paper?.sections ?? [];
+
+  // 异步加载PDF URL
+  useEffect(() => {
+    getPaperPDFUrl(selectedPaperId).then(setPdfUrl).catch(() => setPdfUrl(""));
+  }, [selectedPaperId]);
 
   // 加载批注
   useEffect(() => {
@@ -202,7 +220,11 @@ export default function ReaderPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 h-[calc(100vh-3.5rem)] flex flex-col">
       {/* 顶部：论文选择器 */}
-      <div className="flex items-center gap-4 mb-4 shrink-0">
+      <div className="flex items-center gap-4 mb-4 shrink-0 flex-wrap">
+        <LazyPaperUpload onUploaded={(p) => {
+          setUploadedPapers((prev) => [...prev, p]);
+          setSelectedPaperId(p.id!);
+        }} />
         <label className="text-sm font-medium text-[#1a3a5c] whitespace-nowrap">
           选择论文：
         </label>
@@ -211,9 +233,9 @@ export default function ReaderPage() {
           onChange={(e) => setSelectedPaperId(parseInt(e.target.value))}
           className="flex-1 max-w-lg px-3 py-2 border border-border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1a3a5c]/30"
         >
-          {papers.map((p) => (
+          {allPapers.map((p) => (
             <option key={p.id} value={p.id}>
-              [{p.id}] {p.title.substring(0, 60)}... — {p.authors}
+              [{p.id}] {p.title.substring(0, 60)}... — {p.authors}{p.source === "uploaded" ? " 📄" : ""}
             </option>
           ))}
         </select>
@@ -315,7 +337,7 @@ export default function ReaderPage() {
               <div className="border-t border-border pt-4">
                 {viewMode === "pdf" ? (
                   <div className="min-h-[500px]">
-                    <PDFViewer pdfUrl={getPaperPDFUrl(selectedPaperId)} />
+                    <PDFViewer pdfUrl={pdfUrl} />
                   </div>
                 ) : (
                   renderContent()

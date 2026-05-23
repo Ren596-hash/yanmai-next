@@ -4,24 +4,54 @@
 
 import type { AskFirstResponse, FollowupResponse } from "./types";
 
-// TODO: 替换为平台AI真实调用
+// --- AI 配置接口 ---
+// 在竞赛平台或生产环境中设置这些值，即可启用真实AI调用
+
+export interface AIConfig {
+  apiUrl: string;
+  apiKey: string;
+  model: string;
+  enabled: boolean;
+}
+
+let aiConfig: AIConfig = {
+  apiUrl: "",
+  apiKey: "",
+  model: "platform-model",
+  enabled: false,
+};
+
+export function configureAI(config: Partial<AIConfig>): void {
+  aiConfig = { ...aiConfig, ...config };
+}
+
+export function getAIConfig(): AIConfig {
+  return { ...aiConfig };
+}
+
 async function fetchToPlatformAI(
   messages: { role: string; content: string }[],
   temperature = 0.7
 ): Promise<string> {
-  // 竞赛平台API就绪后，取消注释以下代码:
-  // const res = await fetch(process.env.PLATFORM_AI_API_URL!, {
-  //   method: "POST",
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //     Authorization: `Bearer ${process.env.PLATFORM_AI_API_KEY}`,
-  //   },
-  //   body: JSON.stringify({ model: "platform-model", messages, temperature }),
-  // });
-  // const data = await res.json();
-  // return data.choices[0].message.content;
+  if (!aiConfig.enabled || !aiConfig.apiUrl) {
+    throw new Error("Platform AI not configured");
+  }
 
-  throw new Error("Platform AI not configured");
+  const res = await fetch(aiConfig.apiUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${aiConfig.apiKey}`,
+    },
+    body: JSON.stringify({ model: aiConfig.model, messages, temperature }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`AI API error: ${res.status}`);
+  }
+
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content || data.response || JSON.stringify(data);
 }
 
 // ============================================================

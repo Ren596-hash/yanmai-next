@@ -1,4 +1,5 @@
 import papers from "@/data/papers.json";
+import { addPaper, getAllPapers, getReadingLog, addReadingEntry, saveProfile, loadProfile } from "./storage";
 
 // --- 替代 /api/onboarding/assess ---
 
@@ -63,83 +64,137 @@ export function assessOnboarding(input: AssessmentInput) {
 
 // --- 替代 /api/papers/[id]/pdf ---
 
-function generateMinimalPDF(_title: string, _authors: string, _abstract: string): Uint8Array {
-  const pdf = `%PDF-1.4
-1 0 obj
-<< /Type /Catalog /Pages 2 0 R >>
-endobj
-2 0 obj
-<< /Type /Pages /Kids [3 0 R] /Count 1 >>
-endobj
-3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792]
-   /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
-endobj
-4 0 obj
-<< /Length 44 >>
+function generateContentPDF(title: string, authors: string, abstract: string, sections: string[][]): Uint8Array {
+  const lines: string[] = [];
+  lines.push(title);
+  lines.push("");
+  lines.push(authors);
+  lines.push("");
+  lines.push("摘要：" + abstract);
+  lines.push("");
+
+  for (const [heading, body] of sections) {
+    lines.push(heading);
+    lines.push(body.replace(/<[^>]+>/g, ""));
+    lines.push("");
+  }
+
+  const fullText = lines.join("\n");
+  const encoder = new TextEncoder();
+
+  // Build a proper multi-page PDF
+  const objects: string[] = [];
+  const pageKids: string[] = [];
+  const contentRefs: string[] = [];
+  const CHARS_PER_LINE = 80;
+  const LINES_PER_PAGE = 55;
+
+  let offset = 0;
+  let pageNum = 0;
+  const textContent = fullText;
+
+  while (offset < textContent.length) {
+    pageNum++;
+    const pageContent = textContent.slice(offset, offset + CHARS_PER_LINE * LINES_PER_PAGE);
+    offset += CHARS_PER_LINE * LINES_PER_PAGE;
+
+    const streamContent = `BT /F1 11 Tf 50 740 Td 12 TL (${pageContent.replace(/[()\\]/g, "\\$&").replace(/\n/g, ")' Tj T* (")}) Tj ET`;
+
+    const contentObj = `${4 + pageNum * 2 - 1} 0 obj
+<< /Length ${streamContent.length} >>
 stream
-BT /F1 12 Tf 50 700 Td (Demo PDF) Tj ET
+${streamContent}
 endstream
-endobj
-5 0 obj
+endobj`;
+
+    const pageObj = `${4 + pageNum * 2} 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792]
+   /Contents ${4 + pageNum * 2 - 1} 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj`;
+
+    objects.push(contentObj, pageObj);
+    pageKids.push(`${4 + pageNum * 2} 0 R`);
+    contentRefs.push(`${4 + pageNum * 2 - 1} 0 R`);
+  }
+
+  const pagesObj = `2 0 obj
+<< /Type /Pages /Kids [${pageKids.join(" ")}] /Count ${pageNum} >>
+endobj`;
+
+  const catalogObj = `1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj`;
+
+  const fontObj = `5 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
-endobj
-xref
-0 6
+endobj`;
+
+  // Build xref table
+  const allObjects = [catalogObj, pagesObj, ...objects, fontObj];
+  let xrefOffset = 0;
+  const xrefEntries: string[] = [];
+  for (const obj of allObjects) {
+    xrefEntries.push(`${String(xrefOffset).padStart(10, "0")} 00000 n`);
+    xrefOffset += obj.length + 1; // +1 for \n
+  }
+
+  const xref = `xref
+0 ${allObjects.length + 1}
 0000000000 65535 f
-0000000009 00000 n
-0000000058 00000 n
-0000000115 00000 n
-0000000266 00000 n
-0000000360 00000 n
+${xrefEntries.join("\n")}`;
+
+  const pdf = `%PDF-1.4
+${allObjects.join("\n")}
+${xref}
 trailer
-<< /Size 6 /Root 1 0 R >>
+<< /Size ${allObjects.length + 1} /Root 1 0 R >>
 startxref
-440
+${xrefOffset}
 %%EOF`;
 
-  const encoder = new TextEncoder();
   return encoder.encode(pdf);
 }
 
-export function getPaperPDFUrl(paperId: number): string {
+export async function getPaperPDFUrl(paperId: number): Promise<string> {
+  // Check IndexedDB for uploaded paper with real PDF
+  try {
+    const { getPaperPDF } = await import("./storage");
+    const stored = await getPaperPDF(paperId);
+    if (stored) {
+      const blob = new Blob([stored], { type: "application/pdf" });
+      return URL.createObjectURL(blob);
+    }
+  } catch { /* fall through */ }
+
+  // Fall back to generated PDF from static data
   const paper = papers.find((p) => p.id === paperId);
   if (!paper) return "";
-  const uint8 = generateMinimalPDF(paper.title, paper.authors, paper.abstract);
+  const uint8 = generateContentPDF(paper.title, paper.authors, paper.abstract, paper.sections as string[][]);
   const blob = new Blob([uint8.buffer as ArrayBuffer], { type: "application/pdf" });
   return URL.createObjectURL(blob);
 }
 
 // --- 替代 /api/analytics/reading ---
 
-interface ReadingEntry {
+interface TrackReadingData {
   paper_id: number;
   section_id: string;
   action: string;
   dwell_seconds?: number;
-  timestamp: number;
 }
 
-const STORAGE_KEY = "yanmai_reading_log";
-
-export function trackReading(data: Omit<ReadingEntry, "timestamp">) {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const log: ReadingEntry[] = raw ? JSON.parse(raw) : [];
-    log.push({ ...data, timestamp: Date.now() });
-    // 只保留最近200条
-    if (log.length > 200) log.splice(0, log.length - 200);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(log));
-  } catch {
-    // localStorage不可用时静默忽略
-  }
+export function trackReading(data: TrackReadingData) {
+  addReadingEntry({ ...data, timestamp: Date.now() }).catch(() => {});
 }
 
-export function getReadingLog(): ReadingEntry[] {
+export function getReadingLogSync(): { paper_id: number; section_id: string; action: string; dwell_seconds?: number; timestamp: number }[] {
+  // Fallback synchronous access for components that can't use async
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem("yanmai_reading_log_sync");
     return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
+  } catch { return []; }
 }
+
+// --- User Profile ---
+
+export { saveProfile, loadProfile, getReadingLog, addPaper, getAllPapers };
