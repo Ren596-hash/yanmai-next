@@ -258,6 +258,7 @@ CREATE POLICY "profiles_public_read" ON profiles FOR SELECT USING (true);
 
 -- 写入策略 (Demo简化，生产环境需结合auth.uid())
 CREATE POLICY "profiles_insert" ON profiles FOR INSERT WITH CHECK (true);
+CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (true) WITH CHECK (true);
 CREATE POLICY "annotations_insert" ON annotations FOR INSERT WITH CHECK (true);
 CREATE POLICY "user_annotations_insert" ON user_annotations FOR INSERT WITH CHECK (true);
 CREATE POLICY "annotation_replies_insert" ON annotation_replies FOR INSERT WITH CHECK (true);

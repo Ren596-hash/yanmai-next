@@ -82,12 +82,12 @@ export default function AdvisorPage() {
     <div className="max-w-7xl mx-auto px-4 py-6 h-[calc(100vh-3.5rem)] flex gap-6">
       {/* 左侧主区 */}
       <div className="flex-1 flex flex-col min-w-0">
-        <h2 className="text-xl font-semibold text-[#1a3a5c] mb-4">
-          ⚠️ 避坑顾问 · 案例匹配
+        <h2 className="text-xl font-semibold text-primary mb-4">
+          避坑顾问 · 案例匹配
         </h2>
 
         {/* 搜索区 */}
-        <div className="bg-white rounded-xl border border-border p-4 mb-4">
+        <div className="bg-card rounded-xl border border-border p-4 mb-4">
           <div className="flex gap-2">
             <input
               type="text"
@@ -95,12 +95,12 @@ export default function AdvisorPage() {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               placeholder="描述你的实验方案，系统自动匹配历史失败案例..."
-              className="flex-1 px-4 py-2.5 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/50 text-sm"
+              className="flex-1 px-4 py-2.5 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 text-sm"
             />
             <button
               onClick={handleSearch}
               disabled={!query.trim() || loading}
-              className="bg-[#1a3a5c] text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-[#1a3a5c]/90 disabled:opacity-50 transition-colors shrink-0"
+              className="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors shrink-0"
             >
               {loading ? "分析中..." : "搜索"}
             </button>
@@ -116,39 +116,38 @@ export default function AdvisorPage() {
         </div>
 
         {/* 结果区域 */}
-        <div className="flex-1 bg-white rounded-xl border border-border p-6 overflow-y-auto">
+        <div className="flex-1 bg-card rounded-xl border border-border p-6 overflow-y-auto">
           {phase === "ask" && !loading && (
             <div className="text-center text-muted-foreground mt-16">
-              <span className="text-5xl block mb-4">⚠️</span>
-              <p>输入实验方案关键词</p>
+              <p className="text-lg font-medium mb-2">输入实验方案关键词</p>
               <p className="text-xs mt-1">
-                试试：退火 / Cu₂O / XPS / pH / 溶剂 / NaBH₄ / TEM ...
+                试试：微服务 / SSR / K8s / Redis / CI/CD / CORS / N+1 ...
               </p>
             </div>
           )}
 
           {phase === "think" && (
             <div className="think-prompt-box">
-              <p className="text-sm font-medium text-amber-800 mb-2">
-                🤔 先思考再查看
+              <p className="text-sm font-medium text-blue-900 mb-2">
+                先思考，再看结果
               </p>
               <div
-                className="text-sm text-amber-700 mb-4"
+                className="text-sm text-blue-800 mb-4"
                 dangerouslySetInnerHTML={{ __html: aiQuestion }}
               />
               <textarea
                 value={thinkAnswer}
                 onChange={(e) => setThinkAnswer(e.target.value)}
                 placeholder="写下你的思考..."
-                className="w-full px-3 py-2 border border-amber-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none mb-2"
+                className="w-full px-3 py-2 border border-blue-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none mb-2"
                 rows={3}
               />
               <button
                 onClick={handleThinkSubmit}
                 disabled={!thinkAnswer.trim() || loading}
-                className="w-full bg-amber-500 text-white py-2 rounded-lg text-sm font-medium hover:bg-amber-600 disabled:opacity-50 transition-colors"
+                className="w-full bg-blue-500 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-600 disabled:opacity-50 transition-colors"
               >
-                {loading ? "匹配中..." : "提交思考，查看案例 →"}
+                {loading ? "匹配中..." : "提交 →"}
               </button>
             </div>
           )}
@@ -176,9 +175,8 @@ export default function AdvisorPage() {
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-2">
-                        {i === 0 && <span className="text-sm">🔥</span>}
-                        <span className="text-sm">{i === 0 ? "最相关" : "📌"}</span>
-                        <h4 className="font-semibold text-[#1a3a5c]">{f.title}</h4>
+                        {i === 0 && <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-red-100 text-red-600">最佳匹配</span>}
+                        <h4 className="font-semibold text-primary">{f.title}</h4>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm mb-2">
                         <div>
@@ -192,7 +190,7 @@ export default function AdvisorPage() {
                       </div>
                       <div className="text-sm space-y-1 mb-2">
                         <p>
-                          <span className="font-medium text-[#1a3a5c]">做了什么：</span>
+                          <span className="font-medium text-primary">做了什么：</span>
                           {f.what}
                         </p>
                         <p>
@@ -200,7 +198,7 @@ export default function AdvisorPage() {
                           {f.failure}
                         </p>
                         <p>
-                          <span className="font-medium text-amber-600">原因：</span>
+                          <span className="font-medium text-amber-600">根因：</span>
                           {f.why}
                         </p>
                         <p>
@@ -228,8 +226,8 @@ export default function AdvisorPage() {
       </div>
 
       {/* 右侧失败案例库 */}
-      <div className="w-64 shrink-0 bg-white rounded-xl border border-border p-4 overflow-y-auto">
-        <h3 className="font-semibold text-[#1a3a5c] mb-3 text-sm">
+                      <div className="w-64 shrink-0 bg-card rounded-xl border border-border p-4 overflow-y-auto">
+        <h3 className="font-semibold text-primary mb-3 text-sm">
           失败案例库 ({allFailures.length})
         </h3>
         <div className="space-y-1">
@@ -242,7 +240,7 @@ export default function AdvisorPage() {
               }}
               className="w-full text-left px-2 py-1.5 rounded text-xs hover:bg-muted transition-colors border border-transparent hover:border-border"
             >
-              <span className="font-medium text-[#1a3a5c]">{f.title}</span>
+              <span className="font-medium text-primary">{f.title}</span>
               <span className="text-muted-foreground block text-[10px]">
                 {f.experimenter} · {f.people_count}人踩坑
               </span>

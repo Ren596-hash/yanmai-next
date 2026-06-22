@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { useRouter } from "next/navigation";
+import { getThemeColors } from "@/lib/theme-colors";
 
 // ============================================================
 // 数据 (从Flask版迁移)
@@ -102,11 +103,12 @@ function KnowledgeGraph() {
     svg.selectAll("*").remove();
 
     const tooltip = d3.select(tooltipRef.current);
+    const colors = getThemeColors();
 
     const colorMap: Record<string, string> = {
-      paper: "#3b82f6",
-      member: "#ec4899",
-      failure: "#ef4444",
+      paper: colors.blue,
+      member: colors.pink,
+      failure: colors.red,
     };
 
     const nodes = GRAPH_DATA.nodes.map((d) => ({ ...d }));
@@ -142,7 +144,7 @@ function KnowledgeGraph() {
       .selectAll("line")
       .data(links)
       .join("line")
-      .attr("stroke", (d) => (d.type === "tag_link" ? "#d1d5db" : "#9ca3af"))
+      .attr("stroke", (d) => (d.type === "tag_link" ? colors.gray : colors.mutedForeground))
       .attr("stroke-width", (d) => (d.type === "tag_link" ? 1 : 2))
       .attr("stroke-dasharray", (d) => (d.type === "tag_link" ? "5,3" : "none"));
 
@@ -158,7 +160,7 @@ function KnowledgeGraph() {
         return 10;
       })
       .attr("fill", (d) => colorMap[d.type])
-      .attr("stroke", "#fff")
+      .attr("stroke", colors.card)
       .attr("stroke-width", 2)
       .attr("cursor", "pointer")
       .call(
@@ -190,7 +192,7 @@ function KnowledgeGraph() {
       .attr("font-size", 9)
       .attr("dx", 14)
       .attr("dy", 3)
-      .attr("fill", "#374151")
+      .attr("fill", colors.foreground)
       .attr("pointer-events", "none");
 
     // 悬停
@@ -201,7 +203,7 @@ function KnowledgeGraph() {
           .html(
             `<div class="text-xs">
               <strong>${d.label}</strong><br/>
-              类型: ${d.type === "paper" ? "📄 论文" : d.type === "member" ? "👤 成员" : "⚠️ 失败案例"}<br/>
+              类型: ${d.type === "paper" ? "论文" : d.type === "member" ? "成员" : "失败案例"}<br/>
               ${d.tags ? "标签: " + d.tags.join(", ") : ""}
               ${d.mastery !== undefined ? "掌握度: " + d.mastery + "%" : ""}
               ${d.status ? "<br/>状态: " + d.status : ""}
@@ -245,16 +247,16 @@ function KnowledgeGraph() {
 
   return (
     <div className="relative">
-      <svg ref={svgRef} width="100%" height="400" className="bg-white rounded-xl" />
+      <svg ref={svgRef} width="100%" height="400" className="bg-card rounded-xl" />
       <div
         ref={tooltipRef}
-        className="absolute hidden bg-white border border-border rounded-lg p-2 shadow-lg pointer-events-none z-50"
+        className="absolute hidden bg-card border border-border rounded-lg p-2 shadow-lg pointer-events-none z-50"
       />
       {/* 图例 */}
       <div className="flex gap-4 justify-center mt-2 text-xs text-muted-foreground">
-        <span>🔵 论文</span>
-        <span>🩷 成员</span>
-        <span>🔴 失败案例</span>
+        <span>论文</span>
+        <span>成员</span>
+        <span>失败案例</span>
         <span>— 批注关系</span>
         <span>- - 标签关联</span>
       </div>
@@ -267,8 +269,8 @@ function KnowledgeGraph() {
 // ============================================================
 function AlertList() {
   return (
-    <div className="bg-white rounded-xl border border-border p-6">
-      <h3 className="font-semibold text-[#1a3a5c] mb-4">🔔 系统预警</h3>
+    <div className="bg-card rounded-xl border border-border p-6">
+      <h3 className="font-semibold text-primary mb-4">系统预警</h3>
       <div className="space-y-2">
         {ALERTS.map((alert, i) => (
           <div
@@ -282,7 +284,7 @@ function AlertList() {
             }`}
           >
             <span className="mr-1">
-              {alert.level === "danger" ? "🔴" : alert.level === "warning" ? "🟡" : "🟢"}
+              {alert.level === "danger" ? "" : alert.level === "warning" ? "" : ""}
             </span>
             {alert.text}
           </div>
@@ -297,26 +299,26 @@ function AlertList() {
 // ============================================================
 function WeeklyDigest() {
   return (
-    <div className="bg-white rounded-xl border border-border p-6">
+    <div className="bg-card rounded-xl border border-border p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-[#1a3a5c]">📋 本周摘要预览</h3>
-        <button className="text-xs font-medium text-[#c9a96e] hover:text-[#1a3a5c] transition-colors px-3 py-1 rounded border border-[#c9a96e]/30 hover:bg-[#c9a96e]/10">
+        <h3 className="font-semibold text-primary">本周摘要预览</h3>
+        <button className="text-xs font-medium text-accent hover:text-primary transition-colors px-3 py-1 rounded border border-accent/30 hover:bg-accent/10">
           发送周报 →
         </button>
       </div>
       <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground space-y-2">
         <p>
-          <strong className="text-[#1a3a5c]">本周概览（5/15 - 5/21）：</strong>
+          <strong className="text-primary">本周概览（5/15 - 5/21）：</strong>
         </p>
         <ul className="space-y-1 text-xs">
-          <li>📖 <strong>阅读活动</strong>：3位成员阅读了5篇论文，累计21个章节</li>
-          <li>💬 <strong>新增批注</strong>：李华添加了2条新批注，王芳回复了1条</li>
-          <li>⚠️ <strong>失败案例</strong>：陈强提交了1份新失败报告（Cu双金属CO₂RR合成）</li>
-          <li>🧪 <strong>实验进展</strong>：张明远完成XAFS原位测试，数据正常</li>
-          <li>🎓 <strong>传承风险</strong>：张明远毕业在即，缺陷工程和原位表征节点待接班人</li>
+          <li> <strong>阅读活动</strong>：3位成员阅读了5篇论文，累计21个章节</li>
+          <li> <strong>新增批注</strong>：李华添加了2条新批注，王芳回复了1条</li>
+          <li> <strong>失败案例</strong>：陈强提交了1份新失败报告（Cu双金属CO₂RR合成）</li>
+          <li> <strong>实验进展</strong>：张明远完成XAFS原位测试，数据正常</li>
+          <li> <strong>传承风险</strong>：张明远毕业在即，缺陷工程和原位表征节点待接班人</li>
         </ul>
         <p className="text-xs mt-2">
-          📊 <strong>知识健康指数</strong>：<span className="text-green-600 font-medium">78分</span>（较上周+3分）
+           <strong>知识健康指数</strong>：<span className="text-green-600 font-medium">78分</span>（较上周+3分）
         </p>
       </div>
       <p className="text-[10px] text-muted-foreground mt-3 text-center">
@@ -331,8 +333,8 @@ function WeeklyDigest() {
 // ============================================================
 function MemberMastery() {
   return (
-    <div className="bg-white rounded-xl border border-border p-6">
-      <h3 className="font-semibold text-[#1a3a5c] mb-4">👥 成员知识掌握度</h3>
+    <div className="bg-card rounded-xl border border-border p-6">
+      <h3 className="font-semibold text-primary mb-4">成员知识掌握度</h3>
       <div className="space-y-3 mb-4">
         {MEMBERS.map((m) => {
           const color =
@@ -363,7 +365,7 @@ function MemberMastery() {
         })}
       </div>
       <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
-        ⚠️ 张明远即将毕业，缺陷工程和原位表征两个节点流失风险最高
+         张明远即将毕业，缺陷工程和原位表征两个节点流失风险最高
       </div>
     </div>
   );
@@ -375,8 +377,8 @@ function MemberMastery() {
 export default function DashboardPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
-      <h2 className="text-2xl font-semibold text-[#1a3a5c] mb-4">
-        📊 导师驾驶舱
+      <h2 className="text-2xl font-semibold text-primary mb-4">
+        导师驾驶舱
       </h2>
 
       {/* 知识图谱 */}

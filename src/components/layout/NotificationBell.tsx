@@ -1,41 +1,26 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { RoleSwitcher, useRole } from "./RoleSwitcher";
-import { ThemeToggle } from "./ThemeToggle";
 import { cn } from "@/lib/utils";
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, type Notification } from "@/lib/notifications";
 import {
-  Home,
-  BookOpen,
-  AlertTriangle,
-  MessageSquare,
-  Pill,
-  BarChart3,
-  Brain,
-  Search,
-  Rocket,
   Bell,
   MessageCircle,
   Reply,
+  AlertTriangle,
+  Pill,
   GraduationCap,
 } from "lucide-react";
 
-const NAV_ITEMS = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/reader", label: "Read", icon: BookOpen },
-  { href: "/advisor", label: "Pitfalls", icon: AlertTriangle },
-  { href: "/search", label: "Ask", icon: MessageSquare },
-  { href: "/capsule", label: "Capsule", icon: Pill },
-  { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
-  { href: "/growth", label: "Growth", icon: Brain },
-  { href: "/discover", label: "Discover", icon: Search },
-  { href: "/onboarding", label: "Onboard", icon: Rocket },
-];
+const typeIcon: Record<string, React.ReactNode> = {
+  annotation_new: <MessageCircle className="w-4 h-4" />,
+  annotation_reply: <Reply className="w-4 h-4" />,
+  mentor_annotation: <GraduationCap className="w-4 h-4" />,
+  failure_match: <AlertTriangle className="w-4 h-4" />,
+  capsule_ready: <Pill className="w-4 h-4" />,
+};
 
-function NotificationBell() {
+export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const [notifs, setNotifs] = useState<Notification[]>([]);
   const [unread, setUnread] = useState(0);
@@ -70,14 +55,6 @@ function NotificationBell() {
   const handleMarkAllRead = () => {
     markAllAsRead();
     refresh();
-  };
-
-  const typeIcon: Record<string, React.ReactNode> = {
-    annotation_new: <MessageCircle className="w-4 h-4" />,
-    annotation_reply: <Reply className="w-4 h-4" />,
-    mentor_annotation: <GraduationCap className="w-4 h-4" />,
-    failure_match: <AlertTriangle className="w-4 h-4" />,
-    capsule_ready: <Pill className="w-4 h-4" />,
   };
 
   return (
@@ -152,61 +129,5 @@ function NotificationBell() {
         </div>
       )}
     </div>
-  );
-}
-
-export function Navbar() {
-  const pathname = usePathname();
-  const { currentRole } = useRole();
-
-  const filteredItems =
-    currentRole.role === "新生"
-      ? NAV_ITEMS.filter((item) => item.href !== "/dashboard")
-      : NAV_ITEMS;
-
-  return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-border/60">
-      <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center">
-            <span className="text-white text-sm font-bold">C</span>
-          </div>
-          <span className="text-base font-semibold tracking-tight text-primary">
-            CrossMind
-          </span>
-        </Link>
-
-        <nav className="flex items-center gap-0.5 overflow-x-auto">
-          {filteredItems.map((item) => {
-            const isActive =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(item.href);
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-colors",
-                  isActive
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-muted-foreground hover:text-primary hover:bg-muted"
-                )}
-              >
-                <Icon className="w-4 h-4" />
-                <span className="hidden md:inline">{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="flex items-center gap-1 shrink-0">
-          <ThemeToggle />
-          <NotificationBell />
-          <RoleSwitcher />
-        </div>
-      </div>
-    </header>
   );
 }

@@ -161,6 +161,53 @@ export async function loadProfile(): Promise<UserProfile | undefined> {
   });
 }
 
+// --- Seed Demo Data ---
+
+export async function seedDemoData(): Promise<void> {
+  const alreadySeeded = await getSetting("demo_seeded_v4");
+  if (alreadySeeded) return;
+
+  // Generate 14 days of simulated reading log entries
+  const now = Date.now();
+  const paperIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  const actions = ["open_paper", "view_section", "view_section", "view_pdf", "view_annotations"];
+  const entries: Omit<ReadingEntry, "id">[] = [];
+
+  for (let day = 14; day >= 0; day--) {
+    const dayStart = now - day * 24 * 60 * 60 * 1000;
+    // 60% chance of reading on any given day
+    if (Math.random() > 0.4) {
+      const papersRead = 1 + Math.floor(Math.random() * 3); // 1-3 papers per day
+      for (let p = 0; p < papersRead; p++) {
+        const paperId = paperIds[Math.floor(Math.random() * paperIds.length)];
+        const actionsCount = 2 + Math.floor(Math.random() * 5); // 2-6 actions
+        for (let a = 0; a < actionsCount; a++) {
+          entries.push({
+            paper_id: paperId,
+            section_id: `section_${Math.floor(Math.random() * 5)}`,
+            action: actions[Math.floor(Math.random() * actions.length)],
+            dwell_seconds: 15 + Math.floor(Math.random() * 300),
+            timestamp: dayStart + Math.floor(Math.random() * 8 * 60 * 60 * 1000), // random time during day
+          });
+        }
+      }
+    }
+  }
+
+  const db = await openDB();
+  const tx = db.transaction("reading_log", "readwrite");
+  const store = tx.objectStore("reading_log");
+  for (const entry of entries) {
+    store.add(entry);
+  }
+  await new Promise<void>((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+
+  await setSetting("demo_seeded_v4", true);
+}
+
 // --- Settings ---
 
 export async function getSetting(key: string): Promise<unknown> {

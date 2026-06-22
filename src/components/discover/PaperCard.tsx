@@ -9,16 +9,16 @@ interface PaperCardProps {
 
 export default function PaperCard({ paper }: PaperCardProps) {
   return (
-    <div className="bg-white rounded-xl border border-border p-5 hover:border-[#c9a96e]/50 hover:shadow-sm transition-all">
+    <div className="bg-card rounded-xl border border-border p-5 hover:border-accent/50 hover:shadow-sm transition-all">
       <div className="flex items-start justify-between gap-3 mb-2">
         <Link
           href={`/reader?paper=${paper.id}`}
-          className="text-sm font-semibold text-[#1a3a5c] hover:text-[#c9a96e] transition-colors line-clamp-2 flex-1"
+          className="text-sm font-semibold text-primary hover:text-accent transition-colors line-clamp-2 flex-1"
         >
           {paper.title}
         </Link>
         {paper.annotationCount > 0 && (
-          <span className="text-xs bg-[#c9a96e]/20 text-[#c9a96e] px-2 py-0.5 rounded-full shrink-0">
+          <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full shrink-0">
             {paper.annotationCount} 批注
           </span>
         )}
@@ -36,7 +36,7 @@ export default function PaperCard({ paper }: PaperCardProps) {
         {paper.tags.map((tag) => (
           <span
             key={tag}
-            className="text-[10px] bg-muted text-[#1a3a5c] px-2 py-0.5 rounded-full"
+            className="text-[10px] bg-muted text-primary px-2 py-0.5 rounded-full"
           >
             {tag}
           </span>
@@ -46,15 +46,15 @@ export default function PaperCard({ paper }: PaperCardProps) {
       <div className="flex gap-2 mt-3 pt-3 border-t border-border">
         <Link
           href={`/reader?paper=${paper.id}`}
-          className="text-xs text-[#1a3a5c] hover:text-[#c9a96e] transition-colors font-medium"
+          className="text-xs text-primary hover:text-accent transition-colors font-medium"
         >
-          📖 阅读
+           阅读
         </Link>
         <Link
           href={`/reader?paper=${paper.id}&tab=review`}
-          className="text-xs text-[#1a3a5c] hover:text-[#c9a96e] transition-colors"
+          className="text-xs text-primary hover:text-accent transition-colors"
         >
-          🔍 四维审阅
+           四维审阅
         </Link>
       </div>
     </div>

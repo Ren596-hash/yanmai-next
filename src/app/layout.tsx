@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import { RoleProvider } from "@/components/layout/RoleSwitcher";
-import { Navbar } from "@/components/layout/Navbar";
+import { AppShell } from "@/components/layout/AppShell";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import SeedInitializer from "@/components/layout/SeedInitializer";
+import { UserCustomizationsProvider } from "@/components/settings/UserCustomizationsProvider";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -16,9 +19,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "研脉 · 课题组智能科研传承与思维引导平台",
+  title: "研脉 · 课题组知识传承平台",
   description:
-    "AI-native科研知识管理平台 — 把导师的指导、师兄师姐的经验、失败的教训留下来、连起来、在需要的时候推给需要的人",
+    "AI驱动的失败教训库与经验胶囊 — 研究生毕业后，经验不流失",
 };
 
 export default function RootLayout({
@@ -29,15 +32,21 @@ export default function RootLayout({
   return (
     <html
       lang="zh-CN"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
+      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#f8f7f4]">
-        <TooltipProvider>
-          <RoleProvider>
-            <Navbar />
-            <main className="flex-1 pt-14">{children}</main>
-          </RoleProvider>
-        </TooltipProvider>
+      <body className="min-h-full flex flex-col bg-background">
+        <ThemeProvider>
+          <TooltipProvider>
+            <SeedInitializer>
+              <RoleProvider>
+                <UserCustomizationsProvider>
+                  <AppShell>{children}</AppShell>
+                </UserCustomizationsProvider>
+              </RoleProvider>
+            </SeedInitializer>
+          </TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

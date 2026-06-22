@@ -1,8 +1,5 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  output: "export",
-  basePath: "/yanmai-next",
-};
+const nextConfig: NextConfig = {};
 
 export default nextConfig;

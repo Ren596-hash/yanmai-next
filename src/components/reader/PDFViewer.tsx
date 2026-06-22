@@ -31,9 +31,8 @@ export default function PDFViewer({ pdfUrl }: PDFViewerProps) {
   if (!pdfUrl) {
     return (
       <div className="flex flex-col items-center justify-center h-96 text-sm text-muted-foreground gap-2">
-        <span className="text-4xl">📄</span>
         <p>此论文暂无PDF文件</p>
-        <p className="text-xs">请使用「📝 结构化阅读」模式查看论文内容</p>
+        <p className="text-xs">请使用「 结构化阅读」模式查看论文内容</p>
       </div>
     );
   }
@@ -49,7 +48,7 @@ export default function PDFViewer({ pdfUrl }: PDFViewerProps) {
         >
           ← 上一页
         </button>
-        <span className="font-medium text-[#1a3a5c] min-w-[80px] text-center">
+        <span className="font-medium text-primary min-w-[80px] text-center">
           第 {pageNumber} / {numPages || "?"} 页
         </span>
         <button
@@ -76,20 +75,19 @@ export default function PDFViewer({ pdfUrl }: PDFViewerProps) {
       </div>
 
       {/* PDF页面 */}
-      <div className="border border-border rounded-xl overflow-auto bg-white shadow-sm">
+      <div className="border border-border rounded-xl overflow-auto bg-card shadow-sm">
         <Document
           file={pdfUrl}
           onLoadSuccess={onDocLoad}
           onLoadError={() => setLoadError(true)}
           loading={
             <div className="flex flex-col items-center justify-center h-96 text-sm text-muted-foreground gap-2">
-              <div className="animate-spin w-8 h-8 border-2 border-[#1a3a5c] border-t-transparent rounded-full" />
+              <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
               <p>正在加载论文PDF...</p>
             </div>
           }
           error={
             <div className="flex flex-col items-center justify-center h-96 text-sm gap-2">
-              <span className="text-4xl">⚠️</span>
               <p className="text-red-500">PDF加载失败</p>
               <p className="text-xs text-muted-foreground">
                 {loadError ? "文件可能已损坏或格式不受支持" : "请检查文件是否有效"}
@@ -99,7 +97,7 @@ export default function PDFViewer({ pdfUrl }: PDFViewerProps) {
                   setLoadError(false);
                   setNumPages(0);
                 }}
-                className="mt-2 px-4 py-1.5 bg-[#1a3a5c] text-white rounded-md text-xs hover:bg-[#1a3a5c]/90 transition-colors"
+                className="mt-2 px-4 py-1.5 bg-primary text-primary-foreground rounded-md text-xs hover:bg-primary/90 transition-colors"
               >
                 重新加载
               </button>

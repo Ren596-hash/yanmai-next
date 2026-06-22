@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import * as d3 from "d3";
 import Link from "next/link";
+import { getThemeColors } from "@/lib/theme-colors";
 import papers from "@/data/papers.json";
 import annotations from "@/data/annotations.json";
 import { getReadingLog, type ReadingEntry } from "@/lib/storage";
@@ -104,12 +105,12 @@ function ReadingHeatmap({ entries }: { entries: ReadingEntry[] }) {
   const dayLabels = ["", "一", "", "三", "", "五", ""];
 
   return (
-    <div className="bg-white rounded-xl border border-border p-6">
-      <h4 className="text-sm font-semibold text-[#1a3a5c] mb-3">📅 阅读日历</h4>
+    <div className="bg-card rounded-xl border border-border p-6">
+      <h4 className="text-sm font-semibold text-primary mb-3">阅读日历</h4>
       {!hasData && (
         <div className="text-center py-6 text-xs text-muted-foreground">
-          <p className="mb-2">📖 暂无阅读记录</p>
-          <Link href="/reader" className="text-[#c9a96e] hover:underline">去读一篇论文 →</Link>
+          <p className="mb-2">暂无阅读记录</p>
+          <Link href="/reader" className="text-accent hover:underline">去读一篇论文 →</Link>
         </div>
       )}
       {hasData && (
@@ -162,16 +163,16 @@ function ReadingStats({ entries }: { entries: ReadingEntry[] }) {
   });
 
   const stats = [
-    { label: "已读论文", value: readPaperIds.size, unit: "篇", icon: "📄" },
-    { label: "阅读章节", value: totalSections, unit: "节", icon: "📑" },
-    { label: "阅读时长", value: Math.round(totalDwell / 60), unit: "分钟", icon: "⏱️" },
-    { label: "连续打卡", value: streak, unit: "天", icon: "🔥" },
-    { label: "本周活跃", value: recentEntries.length, unit: "次", icon: "📊" },
+    { label: "已读论文", value: readPaperIds.size, unit: "篇", icon: "" },
+    { label: "阅读章节", value: totalSections, unit: "节", icon: "" },
+    { label: "阅读时长", value: Math.round(totalDwell / 60), unit: "分钟", icon: "" },
+    { label: "连续打卡", value: streak, unit: "天", icon: "" },
+    { label: "本周活跃", value: recentEntries.length, unit: "次", icon: "" },
   ];
 
   return (
-    <div className="bg-white rounded-xl border border-border p-6">
-      <h4 className="text-sm font-semibold text-[#1a3a5c] mb-3">📊 阅读统计</h4>
+    <div className="bg-card rounded-xl border border-border p-6">
+      <h4 className="text-sm font-semibold text-primary mb-3">阅读统计</h4>
       {entries.length === 0 ? (
         <div className="text-center py-6 text-xs text-muted-foreground">
           <p>开始阅读论文后，这里会显示统计数据</p>
@@ -181,7 +182,7 @@ function ReadingStats({ entries }: { entries: ReadingEntry[] }) {
           {stats.map((s) => (
             <div key={s.label} className="bg-muted/50 rounded-lg p-3 text-center">
               <span className="text-lg">{s.icon}</span>
-              <p className="text-xl font-bold text-[#1a3a5c]">{s.value}<span className="text-xs font-normal text-muted-foreground ml-0.5">{s.unit}</span></p>
+              <p className="text-xl font-bold text-primary">{s.value}<span className="text-xs font-normal text-muted-foreground ml-0.5">{s.unit}</span></p>
               <p className="text-[10px] text-muted-foreground">{s.label}</p>
             </div>
           ))}
@@ -207,6 +208,8 @@ function TopicRadar({ entries }: { entries: ReadingEntry[] }) {
     const cy = h / 2;
     svg.selectAll("*").remove();
 
+    const colors = getThemeColors();
+
     const topTopics = topics.slice(0, 8);
     const angles = topTopics.map((_, i) => (Math.PI * 2 * i) / topTopics.length - Math.PI / 2);
 
@@ -216,7 +219,7 @@ function TopicRadar({ entries }: { entries: ReadingEntry[] }) {
 
     // Grid circles
     [0.25, 0.5, 0.75, 1].forEach((r) => {
-      g.append("circle").attr("r", radius * r).attr("fill", "none").attr("stroke", "#e5e7eb").attr("stroke-width", 0.5);
+      g.append("circle").attr("r", radius * r).attr("fill", "none").attr("stroke", colors.border).attr("stroke-width", 0.5);
     });
 
     // Axes
@@ -224,7 +227,7 @@ function TopicRadar({ entries }: { entries: ReadingEntry[] }) {
       g.append("line")
         .attr("x2", Math.cos(angle) * radius)
         .attr("y2", Math.sin(angle) * radius)
-        .attr("stroke", "#e5e7eb")
+        .attr("stroke", colors.border)
         .attr("stroke-width", 0.5);
     });
 
@@ -237,7 +240,7 @@ function TopicRadar({ entries }: { entries: ReadingEntry[] }) {
         .attr("text-anchor", x > 0 ? "start" : x < 0 ? "end" : "middle")
         .attr("dominant-baseline", "middle")
         .attr("font-size", "9")
-        .attr("fill", "#374151")
+        .attr("fill", colors.foreground)
         .text(`${topTopics[i].tag}(${topTopics[i].readCount}/${topTopics[i].totalCount})`);
     });
 
@@ -248,15 +251,15 @@ function TopicRadar({ entries }: { entries: ReadingEntry[] }) {
     });
     g.append("polygon")
       .attr("points", readPoints.map((p) => p.join(",")).join(" "))
-      .attr("fill", "#c9a96e")
+      .attr("fill", colors.accent)
       .attr("fill-opacity", 0.3)
-      .attr("stroke", "#c9a96e")
+      .attr("stroke", colors.accent)
       .attr("stroke-width", 1.5);
 
     // Read dots
     g.selectAll(".dot-read").data(readPoints).join("circle")
       .attr("cx", (d) => d[0]).attr("cy", (d) => d[1])
-      .attr("r", 4).attr("fill", "#c9a96e");
+      .attr("r", 4).attr("fill", colors.accent);
 
     // Total polygon (dashed)
     const totalPoints = angles.map((a, i) => {
@@ -265,32 +268,32 @@ function TopicRadar({ entries }: { entries: ReadingEntry[] }) {
     });
     g.append("polygon")
       .attr("points", totalPoints.map((p) => p.join(",")).join(" "))
-      .attr("fill", "#1a3a5c")
+      .attr("fill", colors.primary)
       .attr("fill-opacity", 0.1)
-      .attr("stroke", "#1a3a5c")
+      .attr("stroke", colors.primary)
       .attr("stroke-width", 1)
       .attr("stroke-dasharray", "4,3");
 
     // Legend
     const lg = svg.append("g").attr("transform", `translate(${w - 100},10)`);
-    lg.append("rect").attr("width", 10).attr("height", 10).attr("fill", "#c9a96e").attr("opacity", 0.5);
-    lg.append("text").attr("x", 14).attr("y", 9).text("已读").attr("font-size", "9").attr("fill", "#6b7280");
-    lg.append("rect").attr("width", 10).attr("height", 10).attr("y", 14).attr("fill", "#1a3a5c").attr("opacity", 0.3);
-    lg.append("text").attr("x", 14).attr("y", 23).text("全库").attr("font-size", "9").attr("fill", "#6b7280");
+    lg.append("rect").attr("width", 10).attr("height", 10).attr("fill", colors.accent).attr("opacity", 0.5);
+    lg.append("text").attr("x", 14).attr("y", 9).text("已读").attr("font-size", "9").attr("fill", colors.mutedForeground);
+    lg.append("rect").attr("width", 10).attr("height", 10).attr("y", 14).attr("fill", colors.primary).attr("opacity", 0.3);
+    lg.append("text").attr("x", 14).attr("y", 23).text("全库").attr("font-size", "9").attr("fill", colors.mutedForeground);
   }, [topics]);
 
   if (topics.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-border p-6">
-        <h4 className="text-sm font-semibold text-[#1a3a5c] mb-3">🎯 话题覆盖雷达</h4>
+      <div className="bg-card rounded-xl border border-border p-6">
+        <h4 className="text-sm font-semibold text-primary mb-3">话题覆盖雷达</h4>
         <div className="text-center py-10 text-xs text-muted-foreground">暂无数据</div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl border border-border p-6">
-      <h4 className="text-sm font-semibold text-[#1a3a5c] mb-1">🎯 话题覆盖雷达</h4>
+    <div className="bg-card rounded-xl border border-border p-6">
+      <h4 className="text-sm font-semibold text-primary mb-1">话题覆盖雷达</h4>
       <p className="text-[10px] text-muted-foreground mb-2">金色=已读覆盖 · 深蓝虚线=全库分布</p>
       <svg ref={svgRef} width="100%" height="260" />
     </div>
@@ -312,7 +315,8 @@ function AnnotationDonut() {
     const cx = w / 2;
     const cy = h / 2;
 
-    const colors: Record<string, string> = { mentor: "#1a3a5c", senior: "#c9a96e", reviewer: "#6b7280", cross: "#3b82f6" };
+    const themeColors = getThemeColors();
+    const colors: Record<string, string> = { mentor: themeColors.primary, senior: themeColors.accent, reviewer: themeColors.mutedForeground, cross: themeColors.blue };
     const labels: Record<string, string> = { mentor: "导师", senior: "师兄", reviewer: "审稿人", cross: "跨学科" };
     const data = Object.entries(stats.lensCount).map(([k, v]) => ({ type: k, count: v, label: labels[k] || k, color: colors[k] || "#9ca3af" }));
 
@@ -323,24 +327,24 @@ function AnnotationDonut() {
     g.selectAll("path").data(pie(data)).join("path")
       .attr("d", arc as any)
       .attr("fill", (d) => d.data.color)
-      .attr("stroke", "#fff").attr("stroke-width", 2);
+      .attr("stroke", themeColors.card).attr("stroke-width", 2);
 
     g.selectAll("text").data(pie(data)).join("text")
       .attr("transform", (d) => `translate(${arc.centroid(d)})`)
-      .attr("text-anchor", "middle").attr("font-size", "10").attr("fill", "#fff")
+      .attr("text-anchor", "middle").attr("font-size", "10").attr("fill", themeColors.card)
       .text((d) => d.data.count);
 
     // Legend
     const lg = svg.append("g").attr("transform", `translate(${w - 70},${h - 70})`);
     data.forEach((d, i) => {
       lg.append("rect").attr("x", 0).attr("y", i * 16).attr("width", 8).attr("height", 8).attr("fill", d.color).attr("rx", 1);
-      lg.append("text").attr("x", 12).attr("y", i * 16 + 7).text(d.label).attr("font-size", "9").attr("fill", "#6b7280");
+      lg.append("text").attr("x", 12).attr("y", i * 16 + 7).text(d.label).attr("font-size", "9").attr("fill", themeColors.mutedForeground);
     });
   }, []);
 
   return (
-    <div className="bg-white rounded-xl border border-border p-6">
-      <h4 className="text-sm font-semibold text-[#1a3a5c] mb-1">💬 批注透镜分布</h4>
+    <div className="bg-card rounded-xl border border-border p-6">
+      <h4 className="text-sm font-semibold text-primary mb-1">批注透镜分布</h4>
       <p className="text-[10px] text-muted-foreground mb-2">共 {stats.total} 条批注</p>
       <svg ref={svgRef} width="100%" height="200" />
     </div>
@@ -359,7 +363,8 @@ function KnowledgeMap({ entries }: { entries: ReadingEntry[] }) {
     const h = 280;
     svg.selectAll("*").remove();
 
-    const colorMap: Record<string, string> = { self: "#1a3a5c", paper: "#3b82f6", read: "#10b981", unread: "#d1d5db" };
+    const themeColors = getThemeColors();
+    const colorMap: Record<string, string> = { self: themeColors.primary, paper: themeColors.blue, read: themeColors.green, unread: themeColors.gray };
 
     const nodes: any[] = [
       { id: "me", type: "self", label: "我", r: 14, color: colorMap.self },
@@ -399,7 +404,7 @@ function KnowledgeMap({ entries }: { entries: ReadingEntry[] }) {
     const g = svg.append("g");
 
     g.append("g").selectAll("line").data(links).join("line")
-      .attr("stroke", (d: any) => d.value > 1.5 ? "#c9a96e" : "#e5e7eb")
+      .attr("stroke", (d: any) => d.value > 1.5 ? themeColors.accent : themeColors.border)
       .attr("stroke-width", (d: any) => d.value)
       .attr("stroke-dasharray", (d: any) => d.value > 1.5 ? "0" : "3,2");
 
@@ -408,13 +413,13 @@ function KnowledgeMap({ entries }: { entries: ReadingEntry[] }) {
     node.append("circle")
       .attr("r", (d: any) => d.r)
       .attr("fill", (d: any) => d.color)
-      .attr("stroke", "#fff").attr("stroke-width", 2)
+      .attr("stroke", themeColors.card).attr("stroke-width", 2)
       .attr("opacity", (d: any) => d.read === false ? 0.5 : 1);
 
     node.append("text")
       .text((d: any) => d.label)
       .attr("font-size", 7).attr("dx", (d: any) => d.r + 2).attr("dy", 2)
-      .attr("fill", "#374151").attr("pointer-events", "none");
+      .attr("fill", themeColors.foreground).attr("pointer-events", "none");
 
     node.filter((d: any) => d.type === "paper").append("title").text((d: any) => d.fullTitle || d.label);
 
@@ -431,8 +436,8 @@ function KnowledgeMap({ entries }: { entries: ReadingEntry[] }) {
   }, [readPaperIds]);
 
   return (
-    <div className="bg-white rounded-xl border border-border p-6">
-      <h4 className="text-sm font-semibold text-[#1a3a5c] mb-1">🗺️ 个人知识地图</h4>
+    <div className="bg-card rounded-xl border border-border p-6">
+      <h4 className="text-sm font-semibold text-primary mb-1">个人知识地图</h4>
       <p className="text-[10px] text-muted-foreground mb-2">
         深蓝=我 · 绿=已读 · 灰=未读 · 金线=共享标签≥2
       </p>
@@ -460,19 +465,19 @@ function GrowthSuggestions({ entries }: { entries: ReadingEntry[] }) {
   const hasReadings = entries.length > 0;
 
   return (
-    <div className="bg-white rounded-xl border border-border p-6">
-      <h4 className="text-sm font-semibold text-[#1a3a5c] mb-3">💡 成长建议</h4>
+    <div className="bg-card rounded-xl border border-border p-6">
+      <h4 className="text-sm font-semibold text-primary mb-3">成长建议</h4>
       {!hasReadings ? (
         <div className="text-center py-4 text-xs text-muted-foreground">
-          <p className="mb-2">📚 开始阅读后，系统会根据你的阅读盲区推荐论文</p>
-          <Link href="/reader" className="text-[#c9a96e] hover:underline inline-flex items-center gap-1">
+          <p className="mb-2">开始阅读后，系统会根据你的阅读盲区推荐论文</p>
+          <Link href="/reader" className="text-accent hover:underline inline-flex items-center gap-1">
             去研读第一篇论文 →
           </Link>
         </div>
       ) : (
         <div className="space-y-3">
           {suggestions.length === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-4">🎉 你已覆盖全部论文！</p>
+            <p className="text-xs text-muted-foreground text-center py-4"> 你已覆盖全部论文！</p>
           ) : (
             <>
               <p className="text-[10px] text-muted-foreground mb-2">基于你的阅读盲区，推荐以下未读论文：</p>
@@ -480,13 +485,13 @@ function GrowthSuggestions({ entries }: { entries: ReadingEntry[] }) {
                 <Link
                   key={p.id}
                   href={`/reader?paper=${p.id}`}
-                  className="block p-3 border border-border rounded-lg hover:border-[#c9a96e]/50 hover:bg-muted/30 transition-colors"
+                  className="block p-3 border border-border rounded-lg hover:border-accent/50 hover:bg-muted/30 transition-colors"
                 >
-                  <p className="text-xs font-medium text-[#1a3a5c]">{p.title}</p>
+                  <p className="text-xs font-medium text-primary">{p.title}</p>
                   <div className="flex items-center gap-2 mt-1">
                     {p.tags.map((t: string) => (
-                      <span key={t} className={`text-[10px] px-1.5 py-0.5 rounded-full ${readTags.has(t) ? "bg-muted text-muted-foreground" : "bg-[#c9a96e]/20 text-[#c9a96e]"}`}>
-                        {t}{readTags.has(t) ? " ✓" : " 🆕"}
+                      <span key={t} className={`text-[10px] px-1.5 py-0.5 rounded-full ${readTags.has(t) ? "bg-muted text-muted-foreground" : "bg-accent/20 text-accent"}`}>
+                        {t}{readTags.has(t) ? " ✓" : " "}
                       </span>
                     ))}
                   </div>
@@ -513,7 +518,7 @@ function Milestones({ entries }: { entries: ReadingEntry[] }) {
   if (entries.length > 0) {
     const first = [...entries].sort((a, b) => a.timestamp - b.timestamp)[0];
     milestones.push({
-      icon: "📖", text: "首次阅读论文",
+      icon: "", text: "首次阅读论文",
       date: new Date(first.timestamp).toISOString().split("T")[0],
       detail: `开始研读论文 #${first.paper_id}`,
     });
@@ -526,7 +531,7 @@ function Milestones({ entries }: { entries: ReadingEntry[] }) {
 
   if (hasAnnotations) {
     milestones.push({
-      icon: "💬", text: "接触课题组批注",
+      icon: "", text: "接触课题组批注",
       date: "—",
       detail: `你已读的论文中有课题组的前辈批注`,
     });
@@ -535,7 +540,7 @@ function Milestones({ entries }: { entries: ReadingEntry[] }) {
   const thinkAnns = (annotations as any[]).filter((a: any) => a.has_think_prompt && readPaperIds.has(a.paper_id));
   if (thinkAnns.length > 0) {
     milestones.push({
-      icon: "💡", text: "遇到思维引导问题",
+      icon: "", text: "遇到思维引导问题",
       date: "—",
       detail: `${thinkAnns.length} 个思考题等待你的回答`,
     });
@@ -543,7 +548,7 @@ function Milestones({ entries }: { entries: ReadingEntry[] }) {
 
   if (entries.length >= 3) {
     milestones.push({
-      icon: "⚔️", text: "形成阅读习惯",
+      icon: "", text: "形成阅读习惯",
       date: "—",
       detail: `已稳定阅读 ${readPaperIds.size} 篇论文`,
     });
@@ -555,18 +560,18 @@ function Milestones({ entries }: { entries: ReadingEntry[] }) {
       const lp = localStorage.getItem("yanmai_learning_path");
       if (lp) {
         const parsed = JSON.parse(lp);
-        milestones.push({ icon: "🚀", text: "完成新生入组", date: parsed.savedAt?.split("T")[0] || "—", detail: "3周学习路径已生成" });
+        milestones.push({ icon: "", text: "完成新生入组", date: parsed.savedAt?.split("T")[0] || "—", detail: "3周学习路径已生成" });
       }
     } catch {}
   }
 
   return (
-    <div className="bg-white rounded-xl border border-border p-6">
-      <h4 className="text-sm font-semibold text-[#1a3a5c] mb-3">🏆 思维里程碑</h4>
+    <div className="bg-card rounded-xl border border-border p-6">
+      <h4 className="text-sm font-semibold text-primary mb-3">思维里程碑</h4>
       {milestones.length === 0 ? (
         <div className="text-center py-6 text-xs text-muted-foreground">
-          <p className="mb-2">🏁 开始阅读论文，解锁你的第一个里程碑</p>
-          <Link href="/reader" className="text-[#c9a96e] hover:underline">去研读 →</Link>
+          <p className="mb-2">开始阅读论文，解锁你的第一个里程碑</p>
+          <Link href="/reader" className="text-accent hover:underline">去研读 →</Link>
         </div>
       ) : (
         <div className="space-y-3">
@@ -574,7 +579,7 @@ function Milestones({ entries }: { entries: ReadingEntry[] }) {
             <div key={i} className="flex items-start gap-3 text-sm">
               <span className="text-lg mt-0.5">{m.icon}</span>
               <div className="flex-1">
-                <p className="font-medium text-[#1a3a5c] text-xs">{m.text}</p>
+                <p className="font-medium text-primary text-xs">{m.text}</p>
                 <p className="text-xs text-muted-foreground">{m.detail}</p>
               </div>
               <span className="text-[10px] text-muted-foreground whitespace-nowrap">{m.date}</span>
@@ -611,7 +616,7 @@ export default function GrowthPage() {
   if (!loaded) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-8 flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin w-8 h-8 border-2 border-[#1a3a5c] border-t-transparent rounded-full" />
+        <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -620,8 +625,8 @@ export default function GrowthPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      <h2 className="text-2xl font-semibold text-[#1a3a5c] mb-2 text-center">
-        🧠 个人思维成长档案
+      <h2 className="text-2xl font-semibold text-primary mb-2 text-center">
+        个人思维成长档案
       </h2>
       <p className="text-sm text-muted-foreground mb-8 text-center">
         你的每一条思考、每一次阅读、每一个批注，都在这里留下痕迹
@@ -629,14 +634,14 @@ export default function GrowthPage() {
 
       {/* Empty state CTA */}
       {!hasData && (
-        <div className="mb-8 bg-[#c9a96e]/10 border border-[#c9a96e]/30 rounded-xl p-6 text-center">
-          <p className="text-sm text-[#1a3a5c] font-medium mb-2">🌱 这里还是一片空白</p>
+        <div className="mb-8 bg-accent/10 border border-accent/30 rounded-xl p-6 text-center">
+          <p className="text-sm text-primary font-medium mb-2">这里还是一片空白</p>
           <p className="text-xs text-muted-foreground mb-4">
             去研读几篇论文，添加一些批注和思考，你的成长档案就会逐渐丰富起来
           </p>
           <Link
             href="/reader"
-            className="inline-block px-6 py-2 bg-[#1a3a5c] text-white rounded-lg text-sm hover:bg-[#1a3a5c]/90 transition-colors"
+            className="inline-block px-6 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors"
           >
             开始研读 →
           </Link>
@@ -667,7 +672,7 @@ export default function GrowthPage() {
       </div>
 
       {/* Footer note */}
-      <div className="mt-8 bg-[#c9a96e]/10 border border-[#c9a96e]/20 rounded-xl p-4 text-center text-xs text-muted-foreground">
+      <div className="mt-8 bg-accent/10 border border-accent/20 rounded-xl p-4 text-center text-xs text-muted-foreground">
         数据来源：阅读行为追踪 + 批注 + 思考回答 · 数据仅自己可见 · 导师可见统计概览而非具体内容
       </div>
     </div>

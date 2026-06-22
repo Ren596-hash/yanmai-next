@@ -34,7 +34,7 @@ export const ENGINE_CONFIGS: Record<EngineType, EngineConfig> = {
   mentor: {
     type: "mentor",
     label: "导师引擎",
-    icon: "🎓",
+    icon: "",
     color: "#1a3a5c",
     systemPrompt: `你是一位资深课题组导师，拥有20年催化材料研究经验。
 你的视角：大局观引导，关注课题的战略方向和学术价值。
@@ -46,7 +46,7 @@ export const ENGINE_CONFIGS: Record<EngineType, EngineConfig> = {
   senior: {
     type: "senior",
     label: "师兄引擎",
-    icon: "🧑‍🔬",
+    icon: "",
     color: "#059669",
     systemPrompt: `你是一位经验丰富的博士师兄，刚完成博士阶段的所有实验。
 你的视角：实战细节——实验操作中的陷阱、仪器使用的技巧、数据处理的经验。
@@ -58,7 +58,7 @@ export const ENGINE_CONFIGS: Record<EngineType, EngineConfig> = {
   reviewer: {
     type: "reviewer",
     label: "审稿人引擎",
-    icon: "📝",
+    icon: "",
     color: "#d97706",
     systemPrompt: `你是一位严格的学术审稿人，常年为ACS Catalysis、JACS等期刊审稿。
 你的视角：方法论严谨性——实验设计是否合理、对照是否充分、结论是否有足够证据支撑。
@@ -70,7 +70,7 @@ export const ENGINE_CONFIGS: Record<EngineType, EngineConfig> = {
   cross: {
     type: "cross",
     label: "跨学科引擎",
-    icon: "🔗",
+    icon: "",
     color: "#7c3aed",
     systemPrompt: `你是一位跨学科研究专家，擅长在看似不相关的领域之间建立联系。
 你的视角：类比思维——"这在生物学的Y领域有类似现象…""材料科学的Z方法与你的问题可能相关…"
@@ -86,94 +86,94 @@ const PRESET_REVIEWS: Record<number, LensReviewResult[]> = {
   1: [
     {
       engine: "mentor",
-      label: "🎓 导师引擎",
-      icon: "🎓",
+      label: "导师引擎",
+      icon: "",
       summary:
-        "这篇关于MoS₂缺陷工程的工作是你课题组的奠基性研究。它建立了从缺陷类型识别到光催化性能关联的方法论框架。但有几个方向值得进一步思考。",
+        "这篇关于微服务拆分粒度的实证研究是你课题组在软件架构方向的开创性工作。它建立了从DDD限界上下文到BCA量化评估的方法论桥梁。但有几个方向值得进一步思考。",
       annotations: [
         {
           anchor_text:
-            "MoS₂纳米片的缺陷工程调控及光催化性能研究",
+            "微服务拆分粒度对系统可维护性的影响研究",
           content:
-            "这是课题组在二维材料方向的开创性工作。建议新入组成员先理解缺陷类型（S空位 vs Mo空位 vs 晶界）的定义和表征方法，这是后续所有工作的基础。你考虑过缺陷密度与光催化活性之间的非线性关系吗？",
+            "这是课题组在软件架构方向的奠基性研究。建议新入组成员先理解DDD的限界上下文(Bounded Context)和聚合根(Aggregate Root)的概念——这是后续评估拆分合理性的理论基础。你考虑过组织架构（团队拓扑）对拆分决策的约束吗？康威定律在这里的影响可能比技术指标更大。",
           confidence: "high",
-          confidence_note: "基于课题组5年研究积累",
+          confidence_note: "基于课题组5年架构研究积累",
         },
         {
-          anchor_text: "通过退火温度调控缺陷浓度",
+          anchor_text: "超过60%的微服务迁移项目在第一年内经历了至少一次重大的服务边界重构",
           content:
-            "退火温度是控制缺陷浓度的关键参数。但退火气氛（Ar vs H₂/Ar vs 真空）的影响往往被低估。你有没有系统比较过不同气氛下的退火产物差异？",
+            "这个数据触目惊心。但边界重构不一定意味着失败——它可能反映了团队对业务领域理解的深化。关键问题是：重构的代价有多大？如果边界调整需要大量数据迁移和API重写，那就是拆分决策的问题。你有没有分析过哪些类型的拆分错误最容易导致高代价重构？",
           confidence: "medium",
-          confidence_note: "课题组已有部分对比数据",
+          confidence_note: "课题组已有部分重构代价的案例数据",
         },
       ],
     },
     {
       engine: "senior",
-      label: "🧑‍🔬 师兄引擎",
-      icon: "🧑‍🔬",
+      label: "师兄引擎",
+      icon: "",
       summary:
-        "我做过MoS₂退火实验整整一年，踩过的坑都在这里了。读过这篇后你会少走很多弯路。",
+        "我参与过把电商平台从单体拆成微服务的项目，踩过的坑都在这里了。读过这篇后你会少走很多弯路。",
       annotations: [
         {
-          anchor_text: "管式炉退火处理",
+          anchor_text: "BCA = (限界上下文内聚度 × 数据局部性) / (跨服务耦合度 × 分布式事务比例)",
           content:
-            "⚠️ 管式炉退火时，石英管两端温差可达30°C！样品的摆放位置直接影响缺陷浓度。我们浪费了3个月才发现这个问题——建议每次升温前用测温环校准样品区温度。不要相信温控表的读数。",
+            "BCA公式看起来很美，但实际项目中数据局部性很难衡量——因为数据库分片策略通常是渐进演化的。我的经验：与其计算精确的BCA，不如先画一张服务间的运行时依赖图（用Jaeger的Service Dependency Graph）。如果依赖图看起来像意大利面——环形依赖、长链调用——BCA一定低。先治标（打破循环依赖）再治本（重新划分边界）。",
           confidence: "high",
-          confidence_note: "基于3次失败实验验证",
+          confidence_note: "基于实际微服务迁移项目经验",
         },
         {
-          anchor_text: "XPS表征缺陷",
+          anchor_text: "Jaeger收集了6个月的运维数据",
           content:
-            "XPS测MoS₂时最坑的是石墨碳干扰——实验室常用的碳导电胶会在XPS里产生强C 1s峰。建议用Cu胶带替代，或直接滴涂在Si片上测。另外，Mo 3d的峰拟合方式要统一，我们组有3种不同的拟合方法，导致数据不可比较。",
+            "Jaeger的数据量在微服务架构下增长非常快——我们之前1天就产生200GB的trace数据。生产环境必须配置采样策略：对于健康检查类的请求(约占流量的40%)完全跳过；对于正常请求使用probabilistic sampling 10%；对于错误和慢请求保留100%。这样能把数据量控制在5GB/天以内，还能捕获所有异常。",
           confidence: "high",
-          confidence_note: "已在本组数据标准中规范化",
+          confidence_note: "基于生产环境运维经验",
         },
       ],
     },
     {
       engine: "reviewer",
-      label: "📝 审稿人引擎",
-      icon: "📝",
+      label: "审稿人引擎",
+      icon: "",
       summary:
-        "从方法论角度看，这篇工作整体严谨，但在对照组设置和表征互补性方面有几个值得商榷的地方。",
+        "从方法论角度看，这篇工作整体严谨，但在样本选择偏差和外部效度方面有几个值得商榷的地方。",
       annotations: [
         {
-          anchor_text: "缺陷浓度与光催化活性呈正相关",
+          anchor_text: "BCA指标与系统可维护性（以平均故障恢复时间MTTR衡量）呈显著正相关(r=0.78)",
           content:
-            "这个结论的证据链需要加强。相关性不等于因果性——缺陷浓度的增加可能伴随其他未知因素的变化（如比表面积、表面亲水性等）。建议补充：在相同缺陷浓度下改变缺陷类型的对照实验。",
+            "这个结论的证据链需要加强。r=0.78是强相关，但相关性不等于因果性——可能存在confounding factor。例如，BCA高的项目往往团队工程成熟度也高（能理解DDD概念并付诸实践），MTTR低可能是因为团队能力强而非拆分合理。建议控制团队经验年限、CI成熟度和自动化测试覆盖率等变量后重新分析。",
           confidence: "medium",
-          confidence_note: "方法论层面的通用建议",
+          confidence_note: "方法论层面的通用建议——相关性vs因果性",
         },
         {
-          anchor_text: "通过PL光谱验证缺陷态",
+          anchor_text: "12个工业级微服务系统",
           content:
-            "仅用PL光谱确认缺陷态是不够的。PL对辐射复合敏感，但缺陷态往往以非辐射复合为主。建议补充：瞬态吸收光谱（TAS）或深能级瞬态谱（DLTS）确认缺陷态的能级位置和密度。",
+            "12个项目的样本量在实证软件工程研究中处于可接受范围，但三个行业（电商、金融、物流）各4个项目可能导致行业特定效应与拆分效果混淆。建议：在跨行业分析中明确将行业作为控制变量，并报告每个行业内的效应大小（effect size）而非仅报告总体相关性。",
           confidence: "high",
-          confidence_note: "审稿人常提出的表征互补性问题",
+          confidence_note: "审稿人常提出的样本代表性问题",
         },
       ],
     },
     {
       engine: "cross",
-      label: "🔗 跨学科引擎",
-      icon: "🔗",
+      label: "跨学科引擎",
+      icon: "",
       summary:
-        "MoS₂的缺陷工程与半导体行业的缺陷控制有深层类比，同时自然界光合作用中的缺陷容忍策略也值得借鉴。",
+        "微服务的服务边界决策与城市功能区规划、细胞信号通路模块化存在深层类比，这些跨领域的划分智慧值得借鉴。",
       annotations: [
         {
-          anchor_text: "缺陷工程调控",
+          anchor_text: "限界上下文(Bounded Context)",
           content:
-            "半导体制程中的'缺陷工程'概念比催化领域早发展了30年——芯片制造中的离子注入+退火就是精确控制掺杂缺陷的成熟技术。有意思的是，半导体追求缺陷最小化，而光催化追求缺陷最优化——这个对比本身就是一个研究角度。",
+            "DDD的限界上下文概念与城市规划中的功能区划分惊人地相似——一个城市的商业区、工业区、住宅区各自有独立的规划逻辑和演变节奏。城市如果在商业区中间插了一个工厂，就像微服务中把支付逻辑嵌在用户服务里一样别扭。有意思的是，城市规划中也有类似微服务的'数据局部性'原则——商业区需要靠近交通枢纽（减少通信开销），工业区需要靠近原材料（数据的自然归属）。",
           confidence: "medium",
           confidence_note: "跨领域类比，启发性大于确定性",
         },
         {
-          anchor_text: "光催化性能",
+          anchor_text: "分布式事务",
           content:
-            "自然界光合作用中的光系统II在强光下会主动'关闭'部分反应中心以避免光损伤——这是一种动态缺陷容忍策略。MoS₂光催化剂是否也可以设计类似的'自调节缺陷'机制？比如利用可逆的相变来动态调整缺陷密度？",
+            "微服务的分布式事务管理让人联想到生物体中的细胞间通信——每个细胞是一个独立的服务单元，通过化学信号（激素/神经递质）而非共享内存来协调。生物体对'分布式事务失败'有惊人的容错能力：单个细胞的信号丢失不会导致整个系统崩溃，而是通过冗余信号通路和负反馈机制来维持稳态。微服务架构是否也可以借鉴这种生物学的鲁棒性设计？",
           confidence: "low",
-          confidence_note: "跨学科启发性类比，未经实验验证",
+          confidence_note: "跨学科启发性类比，未经工程验证",
         },
       ],
     },
@@ -182,16 +182,21 @@ const PRESET_REVIEWS: Record<number, LensReviewResult[]> = {
 
 // 跨学科映射表
 const CROSS_DISCIPLINE_MAP: Record<string, string[]> = {
-  "缺陷工程": ["半导体离子注入+退火工艺", "合金强化中的位错调控", "蛋白质定点突变改造"],
-  "光催化": ["自然光合作用光系统II", "光伏电池电荷分离", "光热治疗纳米平台"],
-  "异质结": ["半导体异质结器件", "生物膜离子通道", "热电材料界面工程"],
-  "单原子催化": ["均相催化金属中心", "酶活性位点催化", "金属蛋白电子传递"],
-  "电催化": ["电解水产氢工业装置", "燃料电池MEA设计", "生物电化学传感"],
-  "CO₂还原": ["自然界卡尔文循环", "工业费托合成", "海洋碳固定机制"],
-  "机器学习": ["材料基因组计划", "药物虚拟筛选", "计算机视觉特征提取"],
-  "MoS₂": ["石墨烯电子器件", "拓扑绝缘体表面态", "层状黏土矿物插层"],
-  "钙钛矿": ["传统铁电陶瓷", "高温超导铜氧化物", "有机-无机杂化发光材料"],
-  "CVD": ["半导体外延生长", "薄膜涂层工业", "气溶胶颗粒合成"],
+  "微服务": ["康威定律与组织结构映射", "市政规划功能区划分", "细胞生物学信号通路模块化"],
+  "分布式系统": ["区块链拜占庭将军问题", "议会投票与法定人数机制", "蚁群觅食的分布式决策"],
+  "LLM推理": ["编译器JIT即时编译优化", "数据库查询计划缓存", "CPU分支预测与推测执行"],
+  "向量检索": ["图书馆分类法与索书号", "大脑海马体记忆索引", "物流分拣系统的路径优化"],
+  "React": ["打印机预渲染页面描述", "PDF流式加载与渐进渲染", "视频播放器的自适应码率切换"],
+  "SSR": ["传统CGI服务端渲染", "报纸印刷的模板排布", "CAD工程图的服务器端光栅化"],
+  "Kubernetes": ["机场航班调度与登机口分配", "电网负载均衡与削峰填谷", "医院手术室排班调度"],
+  "CI/CD": ["汽车产线的自动化装配", "新闻编辑部的采编发流水线", "航空签派放行检查单"],
+  "WebAssembly": ["JVM字节码跨平台执行", "游戏主机模拟器的指令翻译", "FPGA的硬件加速描述"],
+  "MLOps": ["制药行业的GMP质量规范", "航天任务的发射checklist", "金融风控模型的持续验证"],
+  "CRDT": ["Git三路合并与冲突解决", "区块链的分布式账本同步", "Wikipedia多人编辑的冲突协商"],
+  "软件架构": ["建筑设计的结构工程学", "城市的综合管廊规划", "交响乐的配器与声部编排"],
+  "性能优化": ["F1赛车的轻量化设计", "航空发动机的推重比优化", "餐厅后厨的出餐流程优化"],
+  "边缘计算": ["加油站的分布式储油", "快递驿站的最后一公里", "CDN的内容就近分发"],
+  "协同编辑": ["交响乐团的多声部协作", "多人在线游戏的同步机制", "航空管制的多席位协调"],
 };
 
 const GAP_PATTERNS = [
@@ -212,10 +217,11 @@ const GAP_PATTERNS = [
 ];
 
 const METHOD_KEYWORDS = [
-  "CVD", "水热", "溶剂热", "退火", "煅烧", "旋涂", "滴涂", "溅射",
-  "XPS", "XRD", "TEM", "SEM", "AFM", "Raman", "XAFS", "FTIR", "BET",
-  "EDS", "XANES", "EXAFS", "EPR", "UPS", "UV-vis", "PL",
-  "表征", "测试", "测量", "检测",
+  "Docker", "K8s", "React", "Next.js", "TypeScript", "Rust", "Webpack", "Vite",
+  "Redis", "PostgreSQL", "Elasticsearch", "Prometheus", "Grafana",
+  "gRPC", "GraphQL", "WebSocket", "WASM", "Nginx", "CI/CD", "Git",
+  "Terraform", "OAuth", "JWT", "REST", "SSR", "CSR", "ISR", "HPA",
+  "微服务", "分布式", "云原生", "容器化", "性能优化", "代码审查",
 ];
 
 const COMPARISON_PATTERNS = [
@@ -300,8 +306,8 @@ function generatePaperAwareReview(paper: PaperLike): LensReviewResult[] {
   }
   results.push({
     engine: "mentor",
-    label: "🎓 导师引擎",
-    icon: "🎓",
+    label: " 导师引擎",
+    icon: "",
     summary: introText
       ? `这篇关于${title.slice(0, 60)}的工作聚焦${paper.tags.slice(0, 3).join('、')}方向。建议带着问题阅读：它的核心发现是否挑战了已有认知？方法论是否可以迁移？`
       : "这篇工作具有学术价值，建议关注其研究范式和方法论框架。",
@@ -313,14 +319,16 @@ function generatePaperAwareReview(paper: PaperLike): LensReviewResult[] {
   if (methodMentions.length > 0) {
     for (const m of methodMentions.slice(0, 2)) {
       const tips: Record<string, string> = {
-        "CVD": `如果复现此实验，注意CVD气氛控制——微量氧泄漏会彻底改变产物。建议在手套箱连用的管式炉中操作，避免空气暴露。`,
-        "XPS": "做XPS前务必确认荷电校正基准。C 1s 284.8 eV不是万能的——如果样品本身含碳，用Au 4f或Ar离子枪清洁后再测。",
-        "退火": "退火操作最关键的是升降温速率和气氛控制。我们之前因为降温太快导致亚稳相出现，数据完全不可比。建议用Ramp模式，≤5°C/min降温。",
-        "XRD": "XRD测层状材料时注意取向效应——如果样品没有充分研磨和随机取向，峰强度比会严重失真。",
-        "TEM": "TEM制样时超声分散时间别太长（>15min），会把纳米片打碎。直接在铜网上滴一滴分散液，自然干燥就行。",
-        "Raman": "Raman测MoS₂时激光功率别超过1mW——功率高了会原位氧化，E¹₂g峰位漂移。先用低功率试，看峰位稳定再加。",
+        "Docker": "如果复现此实验，注意Docker构建缓存——不合理的Dockerfile层顺序会导致每次构建都重新安装依赖，CI时间从3分钟膨胀到15分钟。建议将package.json COPY放在代码COPY之前，利用BuildKit的层缓存。另外，不要在生产镜像中保留构建工具（npm devDependencies），使用多阶段构建分离build和runtime。",
+        "K8s": "K8s部署最容易被忽略的是resource requests/limits配置。没设requests的Pod在节点压力下最先被驱逐——你的生产服务可能在凌晨莫名其妙重启。建议至少设置requests=limits的70%，并且对关键服务使用Guaranteed QoS（requests==limits）。另外，liveness probe的initialDelaySeconds一定要大于应用的实际启动时间——我们之前就因为启动慢于probe导致Pod反复重启。",
+        "Prometheus": "Prometheus的scrape_interval不是越短越好——15s对大多数指标足够了。缩短到5s以下会导致：(1)Prometheus本身CPU翻倍；(2)时间序列基数爆炸（每新增一个target就是几百条新series）；(3)存储需求指数增长。真正需要高频率采样的指标（如请求延迟p99）应该用Histogram的_sum和_count来计算，不需要提高scrape频率。",
+        "PostgreSQL": "PostgreSQL的查询优化器有时会选择次优计划——特别是涉及多表JOIN和子查询时。不要盲目相信EXPLAIN的输出（它是估算不是实际），使用EXPLAIN ANALYZE看实际执行时间。如果优化器选错索引，可以用pg_hint_plan强制指定。另外，vacuum频率不够是慢查询的常见元凶——定期检查pg_stat_user_tables中dead tuple占比，超过10%就该vacuum了。",
+        "Redis": "Redis的热key问题是分布式缓存的经典陷阱。某个key被频繁访问时，所有请求打在同一个节点上，即使集群有10个节点也只有1个在工作。解决方案：(1)本地缓存(如Caffeine)做第一层防御；(2)对热key做replication，客户端随机选择一个副本读取；(3)使用Redis 7的key spec（如TS-{user_id}）让同一用户的key分布到不同slot。",
+        "CI/CD": "CI管道设计中最容易被滥用的就是缓存——缓存过大或不正确的缓存键会导致：(1)构建产物包含过期依赖；(2)缓存恢复时间超过重新构建的时间；(3)缓存命中率低但占用大存储空间。建议：npm/pip的依赖缓存设置max-size限制，定期清理；Docker层缓存只在base image变化时才失效；Git LFS的大文件不要缓存。",
+        "TypeScript": "TypeScript的strict: true是团队协作的最低要求——没有strict类型检查的TS项目比JS好不到哪去。特别是strictNullChecks——这是消除Cannot read property of undefined类bug的唯一方法。如果老项目迁移strict成本太高，至少开启noImplicitAny和strictNullChecks两个最关键的选项。毕竟一个类型检查器的价值主要由它捕获的运行时错误数量决定。",
+        "React": "React性能调优有个反直觉的规则：不要过早使用useMemo/useCallback。先把组件拆小、把状态放低（lifting state down），让每个组件自然地不依赖不变的数据。useMemo的diff开销有时比重新计算还大——只有当计算复杂度O(n>1000)或引用稳定性影响子组件memo时才使用。React DevTools Profiler是你的朋友——先测量再优化。",
       };
-      const tip = tips[m.word] || `在${m.word}表征/操作中，注意样品制备的一致性和环境控制。我们组在此环节踩过坑——同一批样品不同人测的结果偏差可达20%。`;
+      const tip = tips[m.word] || `在${m.word}的使用中，注意文档和最佳实践的遵循。我们在实际项目中踩过坑——配置不当或不合理的架构选择可能导致线上故障。建议参考官方文档和生产案例，结合自己的场景做取舍。`;
       seniorAnnotations.push({
         anchor_text: m.context.slice(0, 120),
         content: tip,
@@ -338,8 +346,8 @@ function generatePaperAwareReview(paper: PaperLike): LensReviewResult[] {
   }
   results.push({
     engine: "senior",
-    label: "🧑‍🔬 师兄引擎",
-    icon: "🧑‍🔬",
+    label: "师兄引擎",
+    icon: "",
     summary: methodMentions.length > 0
       ? `这篇论文涉及${methodMentions.map((m) => m.word).slice(0, 3).join('、')}等方法，我们有直接的实战经验可以分享。`
       : "这篇论文的技术路线值得关注，建议结合实际实验经验来理解。",
@@ -367,8 +375,8 @@ function generatePaperAwareReview(paper: PaperLike): LensReviewResult[] {
   });
   results.push({
     engine: "reviewer",
-    label: "📝 审稿人引擎",
-    icon: "📝",
+    label: " 审稿人引擎",
+    icon: "",
     summary: comparisonSentences.length > 0
       ? "这篇工作的结论包含比较性声明，需要在方法论层面审慎评估证据链的完整性。"
       : "从方法论角度审视这篇工作，关注实验设计和证据链的严谨性。",
@@ -396,8 +404,8 @@ function generatePaperAwareReview(paper: PaperLike): LensReviewResult[] {
   }
   results.push({
     engine: "cross",
-    label: "🔗 跨学科引擎",
-    icon: "🔗",
+    label: " 跨学科引擎",
+    icon: "",
     summary: crossAnalogies.length > 0
       ? `${paper.tags.slice(0, 2).join('、')}与${crossAnalogies.slice(0, 2).map((c) => c.analogy).join('、')}等领域存在深层关联，值得横向思考。`
       : "尝试从跨学科的视角重新审视这篇工作的方法和发现。",

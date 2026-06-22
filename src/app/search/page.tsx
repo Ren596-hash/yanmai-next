@@ -81,16 +81,16 @@ export default function SearchPage() {
       {/* 模式切换 */}
       <div className="flex gap-2 mb-4 shrink-0">
         {[
-          { mode: "think" as const, label: "💡 思维引导", desc: "苏格拉底式反问" },
-          { mode: "debate" as const, label: "⚔️ 思维挑战", desc: "AI扮演学术反对者" },
+          { mode: "think" as const, label: "思维引导", desc: "苏格拉底式反问" },
+          { mode: "debate" as const, label: "思维挑战", desc: "AI扮演学术反对者" },
         ].map((m) => (
           <button
             key={m.mode}
             onClick={() => handleModeSwitch(m.mode)}
             className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
               mode === m.mode
-                ? "bg-[#1a3a5c] text-white border-[#1a3a5c]"
-                : "bg-white text-[#1a3a5c] border-border hover:border-[#c9a96e]"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card text-primary border-border hover:border-accent"
             }`}
           >
             <div>{m.label}</div>
@@ -105,11 +105,10 @@ export default function SearchPage() {
       </div>
 
       {/* 对话区 */}
-      <div className="flex-1 bg-white rounded-xl border border-border p-6 mb-4 overflow-y-auto min-h-0">
+      <div className="flex-1 bg-card rounded-xl border border-border p-6 mb-4 overflow-y-auto min-h-0">
         {messages.length === 0 ? (
           <div className="text-center text-muted-foreground mt-20">
-            <span className="text-5xl block mb-4">💬</span>
-            <h2 className="text-xl font-semibold text-[#1a3a5c] mb-2">
+            <h2 className="text-xl font-semibold text-primary mb-2">
               搜索问答 · 先问再推
             </h2>
             <p className="text-sm">
@@ -118,8 +117,8 @@ export default function SearchPage() {
               而是先反问，引导你独立思考
             </p>
             {mode === "debate" && (
-              <p className="text-xs text-[#c9a96e] mt-2">
-                ⚔️ 思维挑战模式 — 请陈述你的观点
+              <p className="text-xs text-accent mt-2">
+                思维挑战模式 — 请陈述你的观点
               </p>
             )}
           </div>
@@ -157,7 +156,7 @@ export default function SearchPage() {
           <button
             key={scene.id}
             onClick={() => handleLoadScene(scene.id)}
-            className="px-3 py-1.5 text-xs bg-white border border-border rounded-full hover:border-[#c9a96e] hover:text-[#c9a96e] transition-colors whitespace-nowrap"
+            className="px-3 py-1.5 text-xs bg-card border border-border rounded-full hover:border-accent hover:text-accent transition-colors whitespace-nowrap"
           >
             {scene.icon} {scene.title}
           </button>
@@ -190,13 +189,13 @@ export default function SearchPage() {
                 ? "输入你的思考..."
                 : "输入你的问题...（AI将先反问，不直接回答）"
           }
-          className="flex-1 px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a3a5c]/30 text-sm"
+          className="flex-1 px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
           disabled={loading}
         />
         <button
           onClick={handleSend}
           disabled={!input.trim() || loading}
-          className="bg-[#1a3a5c] text-white px-6 py-3 rounded-lg hover:bg-[#1a3a5c]/90 disabled:opacity-50 transition-colors font-medium"
+          className="bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors font-medium"
         >
           {loading ? "..." : "发送"}
         </button>
