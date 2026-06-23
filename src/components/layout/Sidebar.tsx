@@ -1,41 +1,27 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useRole } from "./RoleSwitcher";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
   Home,
-  BookOpen,
-  AlertTriangle,
-  MessageSquare,
-  Pill,
-  BarChart3,
-  Brain,
-  Search,
-  Rocket,
-  Database,
   GitBranch,
-  Settings,
+  Map,
+  AlertTriangle,
+  PenTool,
+  Database,
   PanelLeftClose,
   PanelLeft,
 } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/", label: "首页", icon: Home },
-  { href: "/reader", label: "论文研读", icon: BookOpen },
+  { href: "/directions", label: "方向图谱", icon: GitBranch },
+  { href: "/path", label: "路径推荐", icon: Map },
   { href: "/advisor", label: "避坑顾问", icon: AlertTriangle },
-  { href: "/search", label: "苏格拉底搜索", icon: MessageSquare },
-  { href: "/capsule", label: "知识胶囊", icon: Pill },
-  { href: "/dashboard", label: "数据看板", icon: BarChart3 },
-  { href: "/growth", label: "成长档案", icon: Brain },
+  { href: "/writing", label: "写作助手", icon: PenTool },
   { href: "/knowledge", label: "知识库", icon: Database },
-  { href: "/graph", label: "知识图谱", icon: GitBranch },
-  { href: "/discover", label: "发现", icon: Search },
-  { href: "/onboarding", label: "入组引导", icon: Rocket },
-  { href: "/settings", label: "设置", icon: Settings },
 ];
 
 interface SidebarProps {
@@ -45,25 +31,17 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
-  const { currentRole } = useRole();
-
-  const filteredItems =
-    currentRole.role === "新生"
-      ? NAV_ITEMS.filter((item) => item.href !== "/dashboard")
-      : NAV_ITEMS;
 
   return (
     <>
-      {/* Sidebar */}
       <motion.aside
         initial={false}
         animate={{ width: collapsed ? 64 : 240 }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
         className="fixed top-12 left-0 bottom-0 z-40 bg-card border-r border-border/60 flex flex-col overflow-hidden"
       >
-        {/* Navigation */}
         <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
-          {filteredItems.map((item) => {
+          {NAV_ITEMS.map((item) => {
             const isActive =
               item.href === "/"
                 ? pathname === "/"
@@ -107,7 +85,6 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           })}
         </nav>
 
-        {/* Bottom: Toggle */}
         <div className="border-t border-border/60 p-2">
           <button
             onClick={onToggle}
@@ -136,7 +113,6 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         </div>
       </motion.aside>
 
-      {/* Spacer to push content */}
       <motion.div
         initial={false}
         animate={{ width: collapsed ? 64 : 240 }}

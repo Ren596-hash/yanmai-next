@@ -1,0 +1,119 @@
+[
+  {
+    "id": 1,
+    "direction": "分布式系统与微服务",
+    "description": "从微服务基础理论到故障定位前沿",
+    "papers": [
+      {
+        "paper_id": 1,
+        "order": 1,
+        "note": "必读：建立微服务拆分粒度的理论基础，理解BCA评估框架",
+        "source": "张明远(2020级)验证"
+      },
+      {
+        "paper_id": 4,
+        "order": 2,
+        "note": "必读：掌握分布式共识算法的工程实践，注意对比实验的公平性原则",
+        "source": "王磊(2020级)验证"
+      },
+      {
+        "paper_id": 6,
+        "order": 3,
+        "note": "推荐：理解K8s弹性伸缩的滞后性问题，为RL-Scaler铺垫",
+        "source": "AI基于引用关系推荐"
+      },
+      {
+        "paper_id": 11,
+        "order": 4,
+        "note": "前沿：强化学习+弹性伸缩的最新进展",
+        "source": "课题组最新成果"
+      },
+      {
+        "paper_id": 13,
+        "order": 5,
+        "note": "前沿：因果推断在故障定位中的应用",
+        "source": "课题组最新成果"
+      }
+    ],
+    "verified_by": "张明远(2020级硕士, 已入职字节跳动)",
+    "estimated_weeks": 6
+  },
+  {
+    "id": 2,
+    "direction": "前端架构与性能优化",
+    "description": "从SSR基础到WASM边缘计算",
+    "papers": [
+      {
+        "paper_id": 2,
+        "order": 1,
+        "note": "必读：理解RSC流式SSR的核心原理和自适应渲染策略",
+        "source": "王芳(2021级)验证"
+      },
+      {
+        "paper_id": 8,
+        "order": 2,
+        "note": "必读：掌握Next.js混合水合策略，理解FID优化",
+        "source": "王芳(2021级)验证"
+      },
+      {
+        "paper_id": 5,
+        "order": 3,
+        "note": "推荐：WASM性能基准，为边缘计算学习打基础",
+        "source": "AI基于引用关系推荐"
+      },
+      {
+        "paper_id": 10,
+        "order": 4,
+        "note": "推荐：实时协同编辑中的CRDTvsOT选型",
+        "source": "赵刚(2022级)验证"
+      },
+      {
+        "paper_id": 12,
+        "order": 5,
+        "note": "前沿：WASM在IoT设备上的内存安全",
+        "source": "课题组最新成果"
+      }
+    ],
+    "verified_by": "王芳(2021级硕士, 已入职蚂蚁集团)",
+    "estimated_weeks": 5
+  },
+  {
+    "id": 3,
+    "direction": "AI/ML系统工程",
+    "description": "从LLM推理优化到联邦学习",
+    "papers": [
+      {
+        "paper_id": 3,
+        "order": 1,
+        "note": "必读：理解推测解码的核心范式，为后续推理优化学习打基础",
+        "source": "陈明(2021级)验证"
+      },
+      {
+        "paper_id": 7,
+        "order": 2,
+        "note": "必读：掌握向量索引参数调优方法",
+        "source": "张明远(2020级)验证"
+      },
+      {
+        "paper_id": 9,
+        "order": 3,
+        "note": "推荐：MLOps漂移检测的工程实践",
+        "source": "AI基于引用关系推荐"
+      },
+      {
+        "paper_id": 14,
+        "order": 4,
+        "note": "前沿：LLM在代码审查中的应用",
+        "source": "课题组最新成果"
+      },
+      {
+        "paper_id": 15,
+        "order": 5,
+        "note": "前沿：联邦学习通信压缩方法",
+        "source": "课题组最新成果"
+      }
+    ],
+    "verified_by": "陈明(2021级硕士, 已入职腾讯AI Lab)",
+    "estimated_weeks": 6
+  }
+]

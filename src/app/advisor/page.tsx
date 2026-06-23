@@ -82,9 +82,10 @@ export default function AdvisorPage() {
     <div className="max-w-7xl mx-auto px-4 py-6 h-[calc(100vh-3.5rem)] flex gap-6">
       {/* 左侧主区 */}
       <div className="flex-1 flex flex-col min-w-0">
-        <h2 className="text-xl font-semibold text-primary mb-4">
-          避坑顾问 · 案例匹配
+        <h2 className="text-xl font-semibold text-primary mb-1">
+          🧪 做实验 · 避坑顾问
         </h2>
+        <p className="text-xs text-muted-foreground mb-4">输入你的实验方案，系统匹配历史成功与失败案例。前人踩过的坑，你不需要再踩一遍。</p>
 
         {/* 搜索区 */}
         <div className="bg-card rounded-xl border border-border p-4 mb-4">
@@ -119,9 +120,9 @@ export default function AdvisorPage() {
         <div className="flex-1 bg-card rounded-xl border border-border p-6 overflow-y-auto">
           {phase === "ask" && !loading && (
             <div className="text-center text-muted-foreground mt-16">
-              <p className="text-lg font-medium mb-2">输入实验方案关键词</p>
+              <p className="text-lg font-medium mb-2">输入你的实验/技术方案</p>
               <p className="text-xs mt-1">
-                试试：微服务 / SSR / K8s / Redis / CI/CD / CORS / N+1 ...
+                试试：微服务拆分 / Redis缓存 / K8s弹性伸缩 / CI/CD管道 / 数据库连接池 / SSR性能 ...
               </p>
             </div>
           )}

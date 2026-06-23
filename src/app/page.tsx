@@ -2,55 +2,55 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import {
-  ArrowRight,
-  AlertTriangle,
-  Terminal,
-  Package,
-  Pill,
-} from "lucide-react";
+import { GitBranch, Map, AlertTriangle, PenTool, BookOpen, Users, Sparkles, ArrowRight } from "lucide-react";
+import papers from "@/data/papers.json";
 
-const STATS = [
-  { value: "15份", label: "失败案例库", icon: Terminal },
-  { value: "3个", label: "知识胶囊", icon: Package },
-];
+const DIRECTIONS = [...new Set((papers as any[]).map((p: any) => p.direction).filter(Boolean))];
 
-const CARDS = [
+const STAGES = [
+  {
+    href: "/directions",
+    icon: GitBranch,
+    color: "blue",
+    title: "选方向",
+    subtitle: "研究方向图谱",
+    desc: "浏览课题组历年研究方向、论文分布与创新点脉络。找到你的研究起点。",
+    tag: "第①步",
+  },
+  {
+    href: "/path",
+    icon: Map,
+    color: "emerald",
+    title: "找文献",
+    subtitle: "智能路径推荐",
+    desc: "选择方向后，系统自动生成推荐阅读路径。每篇论文附带前人的阅读笔记与核心要点。",
+    tag: "第②步",
+  },
   {
     href: "/advisor",
     icon: AlertTriangle,
     color: "amber",
-    title: "避坑顾问",
-    subtitle: "输入你的技术方案，AI 匹配历史失败案例",
-    desc: "想做微服务拆分？先看看前人的分布式事务雪崩。想上 SSR？先了解内存泄漏怎么排查。每条案例都标注了根因和教训，而且 AI 会先让你自己思考再揭晓答案。",
-    tag: "核心功能",
+    title: "做实验",
+    subtitle: "避坑顾问",
+    desc: "输入实验方案，系统匹配历史成功与失败案例。前人踩过的坑，你不需要再踩一遍。",
+    tag: "第③步",
   },
   {
-    href: "/capsule",
-    icon: Pill,
+    href: "/writing",
+    icon: PenTool,
     color: "violet",
-    title: "知识胶囊",
-    subtitle: "毕业生一键打包经验，新生一键继承",
-    desc: "张明远毕业了，他的 15 条批注、12 份实验记录、5 个踩坑教训不会消失——打包成知识胶囊，下一届新生入组时自动加载。导师还可以附上推荐论文和学习路径。",
-    tag: "核心功能",
+    title: "写论文",
+    subtitle: "写作助手",
+    desc: "查看往届优秀论文的结构拆解与创新点表述。按照经过验证的模板完成你的初稿。",
+    tag: "第④步",
   },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.35, ease: "easeOut" as const },
-  },
+const colorMap: Record<string, { bg: string; text: string; border: string; light: string }> = {
+  blue:   { bg: "bg-blue-600", text: "text-blue-600", border: "border-blue-200 hover:border-blue-400", light: "bg-blue-50" },
+  emerald:{ bg: "bg-emerald-600", text: "text-emerald-600", border: "border-emerald-200 hover:border-emerald-400", light: "bg-emerald-50" },
+  amber:  { bg: "bg-amber-600", text: "text-amber-600", border: "border-amber-200 hover:border-amber-400", light: "bg-amber-50" },
+  violet: { bg: "bg-violet-600", text: "text-violet-600", border: "border-violet-200 hover:border-violet-400", light: "bg-violet-50" },
 };
 
 export default function HomePage() {
@@ -60,8 +60,8 @@ export default function HomePage() {
       <motion.section
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="mb-16 text-center"
+        transition={{ duration: 0.5 }}
+        className="text-center mb-16"
       >
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium mb-6">
           <motion.span
@@ -69,98 +69,53 @@ export default function HomePage() {
             transition={{ duration: 2, repeat: Infinity }}
             className="w-1.5 h-1.5 rounded-full bg-blue-500"
           />
-          研脉 · 课题组知识传承平台
+          研脉 · 课题组科研知识管理平台
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-primary leading-tight mb-4">
-          研究生毕业后
+          站在前人肩膀上
           <br />
-          <span className="text-blue-600">经验不流失</span>
+          <span className="text-blue-600">不做学术孤儿</span>
         </h1>
-        <p className="text-lg text-muted-foreground max-w-lg mx-auto leading-relaxed">
-          AI 驱动的失败教训库与经验胶囊——
-          把踩过的坑、导师的批注、学长的经验，打包传承给下一届。
+        <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
+          每一届学生的论文、创新点和失败教训，自动沉淀为下一届的起点。
+          选方向 → 找文献 → 做实验 → 写论文，全流程有据可依。
         </p>
-        <div className="mt-8 flex items-center justify-center gap-3">
-          <Link
-            href="/advisor"
-            className="bg-blue-600 text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
-          >
-            试试避坑顾问 <ArrowRight className="w-4 h-4" />
-          </Link>
-          <Link
-            href="/capsule"
-            className="border border-border text-primary px-6 py-3 rounded-xl text-sm font-medium hover:bg-muted transition-colors"
-          >
-            制作知识胶囊
-          </Link>
-        </div>
       </motion.section>
 
-      {/* Stats */}
+      {/* Stage Cards */}
       <motion.section
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="grid grid-cols-2 gap-4 mb-16 max-w-md mx-auto"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.15 }}
+        className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12"
       >
-        {STATS.map((stat) => {
-          const Icon = stat.icon;
+        {STAGES.map((stage, i) => {
+          const Icon = stage.icon;
+          const c = colorMap[stage.color];
           return (
             <motion.div
-              key={stat.label}
-              variants={itemVariants}
-              whileHover={{ y: -3, boxShadow: "0 8px 25px rgba(37,99,235,0.08)" }}
-              transition={{ duration: 0.2 }}
-              className="bg-card rounded-xl border border-border/60 p-5 hover:border-blue-200 transition-colors cursor-default text-center"
+              key={stage.href}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 * i, duration: 0.35 }}
             >
-              <Icon className="w-5 h-5 text-blue-500 mx-auto mb-2" />
-              <motion.div
-                className="text-2xl font-bold text-primary"
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6, duration: 0.3 }}
-              >
-                {stat.value}
-              </motion.div>
-              <div className="text-xs text-muted-foreground">{stat.label}</div>
-            </motion.div>
-          );
-        })}
-      </motion.section>
-
-      {/* Feature Cards — 2 large cards */}
-      <motion.section
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-16"
-      >
-        {CARDS.map((card) => {
-          const Icon = card.icon;
-          const isAmber = card.color === "amber";
-          return (
-            <motion.div key={card.href} variants={itemVariants}>
               <Link
-                href={card.href}
-                className="group block bg-card rounded-2xl border border-border/60 p-7 hover:border-blue-300 hover:shadow-lg transition-all duration-200 h-full"
+                href={stage.href}
+                className={`group block bg-card rounded-xl border ${c.border} p-6 hover:shadow-lg transition-all duration-200 h-full`}
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform ${
-                    isAmber ? "bg-amber-50" : "bg-violet-50"
-                  }`}>
-                    <Icon className={`w-6 h-6 ${isAmber ? "text-amber-600" : "text-violet-600"}`} />
+                <div className="flex items-start justify-between mb-3">
+                  <div className={`w-11 h-11 rounded-xl ${c.light} flex items-center justify-center group-hover:scale-105 transition-transform`}>
+                    <Icon className={`w-5 h-5 ${c.text}`} />
                   </div>
-                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                    isAmber ? "text-amber-700 bg-amber-50" : "text-violet-700 bg-violet-50"
-                  }`}>
-                    {card.tag}
+                  <span className={`text-[10px] font-medium ${c.text} ${c.light} px-2 py-0.5 rounded-full`}>
+                    {stage.tag}
                   </span>
                 </div>
-                <h3 className="text-lg font-semibold text-primary mb-2">{card.title}</h3>
-                <p className="text-xs font-medium text-muted-foreground mb-3">{card.subtitle}</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">{card.desc}</p>
-                <div className="mt-5 flex items-center gap-1 text-sm font-medium text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                  进入 <ArrowRight className="w-4 h-4" />
+                <h3 className="text-lg font-semibold text-primary mb-1">{stage.title}</h3>
+                <p className="text-xs text-muted-foreground mb-2">{stage.subtitle}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">{stage.desc}</p>
+                <div className={`flex items-center gap-1 text-xs font-medium ${c.text} opacity-0 group-hover:opacity-100 transition-opacity`}>
+                  进入 <ArrowRight className="w-3 h-3" />
                 </div>
               </Link>
             </motion.div>
@@ -168,23 +123,45 @@ export default function HomePage() {
         })}
       </motion.section>
 
-      {/* Bottom CTA */}
+      {/* Stats + Directions */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.3 }}
+        transition={{ duration: 0.4, delay: 0.5 }}
+        className="bg-gradient-to-br from-blue-50/60 to-white rounded-2xl border border-blue-100 p-6"
       >
-        <Link
-          href="/onboarding"
-          className="block rounded-2xl p-8 text-center transition-all duration-200 bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800"
-        >
-          <h3 className="text-xl font-semibold mb-2">
-            新生入组？开启三周入门计划
-          </h3>
-          <p className="text-blue-100">
-            完成兴趣评估 → AI 推荐个性化学习路径 → 加载学长的知识胶囊
-          </p>
-        </Link>
+        <div className="flex items-center gap-2 mb-4">
+          <Sparkles className="w-4 h-4 text-blue-500" />
+          <h3 className="text-sm font-semibold text-primary">课题组数据总览</h3>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+          {[
+            { icon: BookOpen, label: "收录论文", value: `${papers.length}篇` },
+            { icon: AlertTriangle, label: "失败案例", value: "8条" },
+            { icon: Users, label: "覆盖学生", value: "6人" },
+            { icon: GitBranch, label: "研究方向", value: `${DIRECTIONS.length}个` },
+          ].map((stat, i) => {
+            const SIcon = stat.icon;
+            return (
+              <div key={i} className="bg-white rounded-lg p-3 border border-border/60 text-center">
+                <SIcon className="w-4 h-4 text-blue-500 mx-auto mb-1" />
+                <div className="text-lg font-bold text-primary">{stat.value}</div>
+                <div className="text-[10px] text-muted-foreground">{stat.label}</div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {DIRECTIONS.map((d: string) => (
+            <Link
+              key={d}
+              href="/directions"
+              className="px-3 py-1 bg-white border border-border/60 rounded-full text-xs text-primary hover:border-blue-300 hover:bg-blue-50 transition-colors"
+            >
+              {d}
+            </Link>
+          ))}
+        </div>
       </motion.section>
     </div>
   );
