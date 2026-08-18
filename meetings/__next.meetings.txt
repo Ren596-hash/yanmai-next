@@ -1,5 +1,5 @@
 1:"$Sreact.fragment"
-2:I[39756,["/yanmai-next/_next/static/chunks/0ey1eee2k6e00.js","/yanmai-next/_next/static/chunks/0d3shmwh5_nmn.js","/yanmai-next/_next/static/chunks/0getnx--xxdy9.js","/yanmai-next/_next/static/chunks/00shh3k3p~p3j.js"],"default"]
-3:I[37457,["/yanmai-next/_next/static/chunks/0ey1eee2k6e00.js","/yanmai-next/_next/static/chunks/0d3shmwh5_nmn.js","/yanmai-next/_next/static/chunks/0getnx--xxdy9.js","/yanmai-next/_next/static/chunks/00shh3k3p~p3j.js"],"default"]
+2:I[39756,["/yanmai-next/_next/static/chunks/08w4lxwtn2uth.js","/yanmai-next/_next/static/chunks/0d3shmwh5_nmn.js","/yanmai-next/_next/static/chunks/00shh3k3p~p3j.js","/yanmai-next/_next/static/chunks/0getnx--xxdy9.js"],"default"]
+3:I[37457,["/yanmai-next/_next/static/chunks/08w4lxwtn2uth.js","/yanmai-next/_next/static/chunks/0d3shmwh5_nmn.js","/yanmai-next/_next/static/chunks/00shh3k3p~p3j.js","/yanmai-next/_next/static/chunks/0getnx--xxdy9.js"],"default"]
 4:[]
-0:{"rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]]}],"isPartial":false,"staleTime":300,"varyParams":"$W4","buildId":"aP_lPyKAGk0NEGkI3xQuw"}
+0:{"rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]]}],"isPartial":false,"staleTime":300,"varyParams":"$W4","buildId":"LiuIZjfGmeFI7WkbtwzVa"}
